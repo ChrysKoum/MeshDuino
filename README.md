@@ -8,7 +8,7 @@ Certainly! Below is an example of how you might structure the README markdown fo
 ![forks](https://badgen.net/github/forks/ChrysKoum/MeshDuino)
 ![license](https://badgen.net/github/license/ChrysKoum/MeshDuino)
 
-<img height="400" width="300" alt="Arduino MeshDuino Project" src="https://github.com/ChrysKoum/MeshDuino/assets/104517252/62b5c931-d861-4512-8c5c-93090bfb3ba7.png">
+<img height="350" width="300" alt="Arduino MeshDuino Project" src="https://github.com/ChrysKoum/MeshDuino/assets/104517252/62b5c931-d861-4512-8c5c-93090bfb3ba7.png">
 
 
 # About MeshDuino
