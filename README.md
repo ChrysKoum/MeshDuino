@@ -1,5 +1,3 @@
-Certainly! Below is an example of how you might structure the README markdown for the "MeshDuino" project, including badges, an introductory section, and instructions for getting started with the code:
-
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/open-source.svg)](https://forthebadge.com)
 
