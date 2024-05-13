@@ -13,7 +13,7 @@ def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 
-def Featured(parent):
+def Challenge(parent):
     
     canvas = Canvas(
         parent,
@@ -56,14 +56,14 @@ def Featured(parent):
     canvas.place(x = 230, y = 72)
 
 
-    #coding
-    global featured_coding_button_image
-    featured_coding_button_image = PhotoImage(file=relative_to_assets("image_coding.png"))
+    #engeenering
+    global challange_coding_button_image
+    challange_coding_button_image = PhotoImage(file=relative_to_assets("image_coding.png"))
     Button(
-        image=featured_coding_button_image,
+        image=challange_coding_button_image,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: threading.Thread(args=("coding",parent),daemon=True).start(),
+        command=lambda: threading.Thread(args=("engeenering",parent),daemon=True).start(),
         relief="flat",
         activebackground="#FFFFFF",
         activeforeground="#FFFFFF"
@@ -72,11 +72,11 @@ def Featured(parent):
 
 
 
-    #lofi
-    global featured_lofi_button_image
-    featured_lofi_button_image = PhotoImage(file=relative_to_assets("image_lofi.png"))
+    #physics
+    global challange_lofi_button_image
+    challange_lofi_button_image = PhotoImage(file=relative_to_assets("image_lofi.png"))
     Button(
-        image=featured_lofi_button_image,
+        image=challange_lofi_button_image,
         borderwidth=0,
         highlightthickness=0,
         command=lambda: threading.Thread(args=("lofi",parent),daemon=True).start(),
@@ -86,15 +86,14 @@ def Featured(parent):
         ).place(x=468, y=140, width=117, height=112)
 
 
-    #Bass
-
-    global featured_bass_button_image
-    featured_bass_button_image = PhotoImage(file=relative_to_assets("image_bass.png"))
+    #Sounds
+    global challange_bass_button_image
+    challange_bass_button_image = PhotoImage(file=relative_to_assets("image_bass.png"))
     Button(
-        image=featured_bass_button_image,
+        image=challange_bass_button_image,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: threading.Thread( args=("bass",parent),daemon=True).start(),
+        command=lambda: threading.Thread( args=("Sounds",parent),daemon=True).start(),
         relief="flat",
         activebackground="#FFFFFF",
         activeforeground="#FFFFFF"
@@ -104,10 +103,10 @@ def Featured(parent):
 
     #Add leaderboard
     '''round_rectangle(52,267,170,375,fill="#171435",outline="")'''
-    global featured_add_button_image
-    featured_add_button_image = PhotoImage(file=relative_to_assets("image_2.png"))
+    global challange_add_button_image
+    challange_add_button_image = PhotoImage(file=relative_to_assets("image_2.png"))
     Button(
-        image=featured_add_button_image,
+        image=challange_add_button_image,
         borderwidth=0,
         highlightthickness=0,
         relief="flat",
@@ -115,30 +114,12 @@ def Featured(parent):
         activeforeground="#FFFFFF"
         ).place(x=284, y=335, width=117, height=112)
 
-
-    #leaderboard 1
-    round_rectangle(237,266,349,375,fill="#171435",outline="")
-    canvas.create_text(259,305,
-    anchor="nw",
-    text="leaderboard 1",
-    fill="#C67FFC",
-    font=("Montserrat Bold", 15 * -1))
-
-    #leaderboard 2
-    round_rectangle(413,266,531,375,fill="#171435",outline="")
-    canvas.create_text(434,305,
-    anchor="nw",
-    text="leaderboard 2",
-    fill="#C67FFC",
-    font=("Montserrat Bold", 15 * -1))
-
-
     canvas.create_text(
         52.0,
         212.0,
         anchor="nw",
-        text="Your leaderboards :",
-        fill="#C67FFC",
+        text="Suggest New Challenge :",
+        fill="#3b5e74",
         font=("Montserrat Bold", 32 * -1)
     )
 
@@ -155,7 +136,7 @@ def Featured(parent):
         52.0,
         21.0,
         anchor="nw",
-        text="Our leaderboards :",
-        fill="#C67FFC",
+        text="Challenges :",
+        fill="#3b5e74",
         font=("Montserrat Bold", 32 * -1)
     )

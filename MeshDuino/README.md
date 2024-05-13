@@ -78,7 +78,7 @@ The Directory's are a little Messed up, so in order to Run the Application smoot
         <td>
             <img src="https://user-images.githubusercontent.com/87000693/181092894-603f8288-1966-4c08-8476-d3e138285046.png" />
             <br />
-            <p align="center">Featured Tab</p></td>
+            <p align="center">challenge Tab</p></td>
         <td>
             <img src="https://user-images.githubusercontent.com/87000693/181092901-ea965dad-7c3f-4f6e-8266-828f7623a363.png" />
             <br />

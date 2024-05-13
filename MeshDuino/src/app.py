@@ -3,7 +3,7 @@ from tkinter import *
 from gui.Primary_Window.sub_gui.about_GUI.gui import About
 from gui.Primary_Window.sub_gui.home_GUI.gui import Home
 from gui.Primary_Window.sub_gui.leaderboard_GUI.gui import Leaderboard
-from gui.Primary_Window.sub_gui.featured_GUI.gui import Featured
+from gui.Primary_Window.sub_gui.challenge_GUI.gui import Challenge
 
 
 OUTPUT_PATH = Path(__file__).parent
@@ -19,9 +19,9 @@ def handle_button_press(btn_name):
     elif btn_name == "leaderboard":
         leaderboard_button_clicked()
         current_window = Leaderboard(window)
-    elif btn_name=="featured":
-        featured_button_clicked()
-        current_window = Featured(window)
+    elif btn_name=="challenge":
+        challenge_button_clicked()
+        current_window = Challenge(window)
     elif btn_name == "about":
         about_button_clicked()
         current_window=About(window)
@@ -35,14 +35,14 @@ def home_button_clicked(): # (coordinates : x= 0 , y= 133)
     canvas.itemconfig(page_navigator, text="Home")
     sidebar_navigator.place(x=0, y=133)    
 
-def leaderboard_button_clicked(): # (coordinates : x= 0 , y= 184)
-    print("leaderboard button clicked")
-    canvas.itemconfig(page_navigator, text="leaderboard")
+def challenge_button_clicked():
+    print("challenge button clicked")
+    canvas.itemconfig(page_navigator, text="Challenge")
     sidebar_navigator.place(x=0, y=184)
 
-def featured_button_clicked():
-    print("Featured button clicked")
-    canvas.itemconfig(page_navigator, text="Featured")
+def leaderboard_button_clicked(): # (coordinates : x= 0 , y= 184)
+    print("leaderboard button clicked")
+    canvas.itemconfig(page_navigator, text="Leaderboard")
     sidebar_navigator.place(x=0, y=232)
 
 def about_button_clicked(): # (coordinates : x= 0 , y= 232)
@@ -109,9 +109,30 @@ home_button.place(
 )
 #################################
 
+####### Challenge BUTTON #############
+challenge_button_image = PhotoImage(
+    file=relative_to_assets("button_2.png"))
+challenge_button = Button(
+    image=challenge_button_image,
+    borderwidth=0,
+    bg="#171435",
+    highlightthickness=0,
+    command=lambda: handle_button_press("challenge"),
+    relief="sunken",
+    activebackground="#171435",
+    activeforeground="#171435"
+)
+challenge_button.place(
+    x=11.35,
+    y=184.0,
+    width=191,
+    height=47.0
+)
+#####################################
+
 ####### leaderboard BUTTON #############
 leaderboard_button_image = PhotoImage(
-    file=relative_to_assets("button_2.png"))
+    file=relative_to_assets("button_8.png"))
 leaderboard_button = Button(
     image=leaderboard_button_image,
     borderwidth=0,
@@ -123,27 +144,6 @@ leaderboard_button = Button(
     activeforeground="#171435"
 )
 leaderboard_button.place(
-    x=11.35,
-    y=184.0,
-    width=191,
-    height=47.0
-)
-#####################################
-
-####### FEATURED BUTTON #############
-featured_button_image = PhotoImage(
-    file=relative_to_assets("button_8.png"))
-featured_button = Button(
-    image=featured_button_image,
-    borderwidth=0,
-    bg="#171435",
-    highlightthickness=0,
-    command=lambda: handle_button_press("featured"),
-    relief="sunken",
-    activebackground="#171435",
-    activeforeground="#171435"
-)
-featured_button.place(
     x=8.0,
     y=232.0,
     width=191.146240234375,
