@@ -51,7 +51,7 @@ This will start the MeshDuino application where you can engage with various chal
 
 ## Acknowledgements
 
-This project, "MeshDuino," builds upon concepts and some aspects of the [CodTubify](https://github.com/iamDyeus/CodTubify) project. We are grateful to the developers and contributors of CodTubify for their original work, which has provided a foundation and inspiration for further development in the context of Arduino-based educational tools. Special thanks to [iamDyeus](https://github.com/iamDyeus) for making their repository open-source, which has greatly facilitated the advancement of STEM education tools.
+This project, "MeshDuino," builds upon concepts and some aspects of the [CodTubify](https://github.com/iamDyeus/CodTubify) project. We are grateful to the developers and contributors of CodTubify for their original work, which has provided a foundation and inspiration for further development in the context of Arduino-based educational tools. Special thanks to [iamDyeus](https://github.com/iamDyeus) for making their repository open-source, which has greatly help in Tkinter and Tkinter-Designer[Tkinter-Designer](https://github.com/ParthJadhav/Tkinter-Designer) showcase.
 
 For more details on the original project and to see the contributions made by the CodTubify team, please visit their [GitHub repository](https://github.com/iamDyeus/CodTubify).
 
