@@ -1,5 +1,3 @@
-Certainly! Below is an example of how you might structure the README markdown for the "MeshDuino" project, including badges, an introductory section, and instructions for getting started with the code:
-
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/open-source.svg)](https://forthebadge.com)
 
@@ -14,6 +12,15 @@ Certainly! Below is an example of how you might structure the README markdown fo
 # About MeshDuino
 
 MeshDuino is an educational toolkit designed to introduce students to engineering principles, coding, physics, and basic networking concepts using a mesh network of Arduinos. This platform uses hands-on experiments to demonstrate how individual devices operate and interact within a network to perform complex tasks, making learning both fun and informative.
+
+## Table of Contents
+- [About MeshDuino](#about-meshduino)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Acknowledgements](#acknowledgements)
+- [Contributions](#contributions)
+- [License](#license)
 
 ## Getting Started
 
@@ -39,6 +46,12 @@ Ensure you have Python installed on your system. You can download Python [here](
    ```
 
 This will start the MeshDuino application where you can engage with various challenges and view the leaderboard of participants.
+
+## Acknowledgements
+
+This project, "MeshDuino," builds upon concepts and some aspects of the [CodTubify](https://github.com/iamDyeus/CodTubify) project. We are grateful to the developers and contributors of CodTubify for their original work, which has provided a foundation and inspiration for further development in the context of Arduino-based educational tools. Special thanks to [iamDyeus](https://github.com/iamDyeus) for making their repository open-source, which has greatly help in Tkinter and Tkinter-Designer[Tkinter-Designer](https://github.com/ParthJadhav/Tkinter-Designer) showcase.
+
+For more details on the original project and to see the contributions made by the CodTubify team, please visit their [GitHub repository](https://github.com/iamDyeus/CodTubify).
 
 ## Contributions
 
