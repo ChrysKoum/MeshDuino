@@ -29,8 +29,8 @@
 #include <RF22.h>
 #include <RF22Router.h>
 
-#define MY_ADDRESS 1
-#define DESTINATION_ADDRESS_1 2
+#define MY_ADDRESS 3
+#define DESTINATION_ADDRESS_1 0
 
 RF22Router rf22(MY_ADDRESS); // Initiate the RF22 with the sender's address
 
@@ -100,11 +100,13 @@ void setup()
   Serial.print("dot=");
   Serial.print(dotLength);
   Serial.println("ms");   
+
   
+  \\Tx code
   if (!rf22.init()) // initialize my radio
     Serial.println("RF22 init failed");
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(450.0)) // set the desired frequency
+  if (!rf22.setFrequency(439.0)) // set the desired frequency
     Serial.println("setFrequency Fail");
   rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
   //1,2,5,8,11,14,17,20 DBM
@@ -113,11 +115,30 @@ void setup()
 
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
-  for(int pinNumber = 4; pinNumber<6; pinNumber++) // I can use pins 4 to 6 as digital outputs (in the example to turn on/off LEDs that show my status)
-  {
-    pinMode(pinNumber,OUTPUT);
-    digitalWrite(pinNumber, LOW);
-  }
+  delay(1000); // delay for 1 s
+
+  
+  // Rx code
+  if (!rf22.init())
+    Serial.println("RF22 init failed");
+  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
+  if (!rf22.setFrequency(438.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
+    Serial.println("setFrequency Fail");
+  rf22.setTxPower(RF22_TXPOW_20DBM);
+  //1,2,5,8,11,14,17,20 DBM
+  rf22.setModemConfig(RF22::OOK_Rb40Bw335  );// The modulation should be the same as that of the transmitter. Otherwise no communication will take place
+  //modulation
+
+  // Manually define the routes for this network
+  rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay 
+
+
+  
+ // for(int pinNumber = 4; pinNumber<6; pinNumber++) // I can use pins 4 to 6 as digital outputs (in the example to turn on/off LEDs that show my status)
+//  {
+  //  pinMode(pinNumber,OUTPUT);
+//    digitalWrite(pinNumber, LOW);
+//  }
   delay(1000); // delay for 1 s
 
 // Test the LED and tone
@@ -158,9 +179,32 @@ void setup()
 }
 
 void loop() 
-{
+{//Rx code receive code from center arduino 
+
+  uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
+  char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
+  memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  uint8_t len = sizeof(buf); // Length of the incoming data
+  uint8_t from; // Variable to store the sender's address
+
+  // Check if data is received
+  if (rf22.recvfromAck(buf, &len, &from)) {
+    buf[len] = '\0'; // Ensure null-termination for proper string handling
+    memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
+
+    Serial.print("Message received from address: ");
+    Serial.println(from, DEC); // Display the sender's address
+    Serial.print("Message: ");
+    Serial.println(incoming); // Display the received message as a string
+    delay(1000);
+}
+
+  
 // Check to see if something has been entered on the keyboard
-  if (Serial.available() > 0)
+
+  
+if (Serial.available() > 0 && incoming=="Arduino 3 get start")
   {
     if (keyboardText == false) 
     {
