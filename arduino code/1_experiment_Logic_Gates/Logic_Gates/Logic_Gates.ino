@@ -41,7 +41,7 @@ void setup() {
   if (!rf22.init())
     Serial.println("RF22 init failed");
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(450.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
+  if (!rf22.setFrequency(434.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
     Serial.println("setFrequency Fail");
   rf22.setTxPower(RF22_TXPOW_20DBM);
   //1,2,5,8,11,14,17,20 DBM
@@ -55,8 +55,8 @@ void setup() {
 
 if (!rf22.init()) // initialize my radio
     Serial.println("RF22 init failed");
-  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(434.0)) // set the desired frequency
+  // Defaults after init are 435.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
+  if (!rf22.setFrequency(435.0)) // set the desired frequency
     Serial.println("setFrequency Fail");
   rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
   //1,2,5,8,11,14,17,20 DBM
