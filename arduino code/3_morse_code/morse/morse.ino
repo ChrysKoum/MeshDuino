@@ -25,6 +25,20 @@
 // Button connects between pin 8 and ground
 // LED (+) to pin 13, (-) 220 Ohm resistor to ground
 //
+
+#include <SPI.h>
+#include <RF22.h>
+#include <RF22Router.h>
+
+#define MY_ADDRESS 3 // define my unique address
+#define DESTINATION_ADDRESS_1 0 // define who I can talk to
+
+
+// Singleton instance of the radio
+RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
+
+
+int received_value=0;
 int tonePin = 2;
 int toneFreq = 1000;
 int ledPin = 13;
@@ -74,6 +88,42 @@ void setup()
   pinMode(tonePin, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
   Serial.begin(9600);
+
+  \\Rx code 
+if (!rf22.init())
+    Serial.println("RF22 init failed");
+  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
+  if (!rf22.setFrequency(438.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
+    Serial.println("setFrequency Fail");
+  rf22.setTxPower(RF22_TXPOW_20DBM);
+  //1,2,5,8,11,14,17,20 DBM
+  rf22.setModemConfig(RF22::OOK_Rb40Bw335  );// The modulation should be the same as that of the transmitter. Otherwise no communication will take place
+  //modulation
+
+  // Manually define the routes for this network
+  rf22.addRouteTo(DESTINATION_ADDRESS_3, DESTINATION_ADDRESS_3); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay 
+ delay(1000);
+  
+  \\Tx code
+  
+if (!rf22.init()) // initialize my radio
+    Serial.println("RF22 init failed");
+  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
+  if (!rf22.setFrequency(439.0)) // set the desired frequency
+    Serial.println("setFrequency Fail");
+  rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
+  //1,2,5,8,11,14,17,20 DBM
+  rf22.setModemConfig(RF22::OOK_Rb40Bw335  ); // set the desired modulation
+  //modulation
+
+  // Manually define the routes for this network
+  rf22.addRouteTo(DESTINATION_ADDRESS_3, DESTINATION_ADDRESS_3);
+ 
+  delay(1000);
+  
+
+
+  
   Serial.println();
   Serial.println("-------------------------------");
   Serial.println("Morse Code decoder/encoder");
@@ -123,8 +173,32 @@ void setup()
 
 void loop() 
 {
+//Rx code receive code from center arduino 
+
+  uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
+  char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
+  memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  uint8_t len = sizeof(buf); // Length of the incoming data
+  uint8_t from; // Variable to store the sender's address
+
+  // Check if data is received
+  if (rf22.recvfromAck(buf, &len, &from)) {
+    buf[len] = '\0'; // Ensure null-termination for proper string handling
+    memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
+
+    Serial.print("Message received from address: ");
+    Serial.println(from, DEC); // Display the sender's address
+    Serial.print("Message: ");
+    Serial.println(incoming); // Display the received message as a string
+    delay(1000);
+}
+
+  
 // Check to see if something has been entered on the keyboard
-  if (Serial.available() > 0)
+
+  
+if (Serial.available() > 0 && incoming=="Arduino 3 get start")
   {
     if (keyboardText == false) 
     {
@@ -232,6 +306,20 @@ void loop()
 
     // Check if the sequence "ABC" is found
     if (decodedLetters.endsWith("ABC")) {
+      
+      char message[] = "finish";
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);    
+  memcpy(data_send, message, strlen(message));
+
+  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
+    Serial.println("sendtoWait failed");
+  }
+  else {
+    Serial.println("sendtoWait Successful");
+  }
+  delay(1000);
+      
       Serial.println(" Success");  // Output success message
       decodedLetters = ""; // Optionally reset the decoded sequence
     }
@@ -285,6 +373,7 @@ void flashDotOrDash(char dotOrDash)
 
   digitalWrite(ledPin, LOW);
   noTone(tonePin);
-  delay(dotLength); 
-}
-//--- end of sketch ---
+  delay(dotLength); }
+
+
+}//end loop
