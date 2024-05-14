@@ -319,7 +319,7 @@ if (Serial.available() > 0 && incoming=="Arduino 3 get start")
       initial_time = millis();
 
       // Replace sensorVal with a specific message
-      char message[] = "Experiment 3 is Success"; // Message to be sent
+      char message[] = "finish"; // Message to be sent
 
       Serial.print("Sending message: ");
       Serial.println(message); // Show the message on Serial Monitor
