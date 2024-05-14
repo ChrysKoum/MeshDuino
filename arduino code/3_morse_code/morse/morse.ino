@@ -128,32 +128,11 @@ void setup()
 
 void loop() 
 {
-//Rx code receive code from center arduino 
 
-  uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
-  char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
-  memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  uint8_t len = sizeof(buf); // Length of the incoming data
-  uint8_t from; // Variable to store the sender's address
-
-  // Check if data is received
-  if (rf22.recvfromAck(buf, &len, &from)) {
-    buf[len] = '\0'; // Ensure null-termination for proper string handling
-    memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
-
-    Serial.print("Message received from address: ");
-    Serial.println(from, DEC); // Display the sender's address
-    Serial.print("Message: ");
-    Serial.println(incoming); // Display the received message as a string
-    delay(1000);
-}
-
-  
 // Check to see if something has been entered on the keyboard
 
   
-if (Serial.available() > 0 && incoming=="Arduino 3 get start")
+if (Serial.available() > 0 )
   {
     if (keyboardText == false) 
     {
@@ -261,19 +240,6 @@ if (Serial.available() > 0 && incoming=="Arduino 3 get start")
 
     // Check if the sequence "ABC" is found
     if (decodedLetters.endsWith("ABC")) {
-      
-      char message[] = "finish";
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);    
-  memcpy(data_send, message, strlen(message));
-
-  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
-    Serial.println("sendtoWait failed");
-  }
-  else {
-    Serial.println("sendtoWait Successful");
-  }
-  delay(1000);
       
       Serial.println(" Success");  // Output success message
       decodedLetters = ""; // Optionally reset the decoded sequence
