@@ -77,6 +77,9 @@ void loop()
     delay(1000);
 } 
 
+   Serial.println("hi");
+
+
 if(incoming=="Arduino 1 get start")
 {
   for(int i=4;i<=10;i++)
