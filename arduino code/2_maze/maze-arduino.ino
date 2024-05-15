@@ -42,7 +42,7 @@ void setup() {
   
     Serial.begin(9600);
  
-//Rx code receive from center arduino
+//Tx,Rx code 
  
 if (!rf22.init())
     Serial.println("RF22 init failed");
@@ -58,21 +58,6 @@ if (!rf22.init())
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
 
 
-//Tx code sent to center arduino 
- 
-if (!rf22.init()) // initialize my radio
-    Serial.println("RF22 init failed");
-  // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(437.0)) // set the desired frequency
-    Serial.println("setFrequency Fail");
-  rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
-  //1,2,5,8,11,14,17,20 DBM
-  rf22.setModemConfig(RF22::OOK_Rb40Bw335  ); // set the desired modulation
-  //modulation
-
-  // Manually define the routes for this network
-  rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
- 
  
 }
 
@@ -179,6 +164,7 @@ if (k==false) {
 }
   
 }//end if from incoming
+
 
    //Tx code sent to center arduino that finish the experiment 
  char message[] = "finish";
