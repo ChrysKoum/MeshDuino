@@ -8,8 +8,8 @@ import pygame
 from threading import Thread, Event
 from pathlib import Path
 import sys
-from utils.character import Character
-from utils.graph import Graph
+from backend.maze_handler.character import Character
+from backend.maze_handler.graph import Graph
 
 # Define the relative_to_assets function
 def relative_to_assets(path: str) -> Path:
