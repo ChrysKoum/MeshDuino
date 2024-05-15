@@ -1,11 +1,11 @@
 #include <RH_RF22.h>
 #include <SPI.h>
-
+#include <RF22Router.h>
 // RFM22 setup
 #define MY_ADDRESS 1
 #define DESTINATION_ADDRESS_1 0
 
-RH_RF22 rf22(MY_ADDRESS);
+RF22Router rf22(MY_ADDRESS);
 
 // constants won't change. They're used here to set pin numbers:
 const int button1Pin = 2;     // the number of the pushbutton pin

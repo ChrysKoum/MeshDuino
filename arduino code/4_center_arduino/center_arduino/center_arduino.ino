@@ -35,9 +35,10 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     char command = Serial.read();
-    
+     sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
+     delay(2000);
     if (command == '1') {
-      sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
+     
     } else if (command == '2') {
       if (receiveMessage() == "finish") {
         sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
