@@ -25,6 +25,10 @@
 // Button connects between pin 8 and ground
 // LED (+) to pin 13, (-) 220 Ohm resistor to ground
 //
+
+
+
+int received_value=0;
 int tonePin = 2;
 int toneFreq = 1000;
 int ledPin = 13;
@@ -74,6 +78,7 @@ void setup()
   pinMode(tonePin, OUTPUT);
   pinMode(buttonPin, INPUT_PULLUP);
   Serial.begin(9600);
+
   Serial.println();
   Serial.println("-------------------------------");
   Serial.println("Morse Code decoder/encoder");
@@ -123,8 +128,11 @@ void setup()
 
 void loop() 
 {
+
 // Check to see if something has been entered on the keyboard
-  if (Serial.available() > 0)
+
+  
+if (Serial.available() > 0 )
   {
     if (keyboardText == false) 
     {
@@ -232,6 +240,7 @@ void loop()
 
     // Check if the sequence "ABC" is found
     if (decodedLetters.endsWith("ABC")) {
+      
       Serial.println(" Success");  // Output success message
       decodedLetters = ""; // Optionally reset the decoded sequence
     }
@@ -285,6 +294,7 @@ void flashDotOrDash(char dotOrDash)
 
   digitalWrite(ledPin, LOW);
   noTone(tonePin);
-  delay(dotLength); 
-}
-//--- end of sketch ---
+  delay(dotLength); }
+
+
+}//end loop
