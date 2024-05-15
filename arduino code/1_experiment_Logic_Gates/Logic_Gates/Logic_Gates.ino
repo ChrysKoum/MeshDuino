@@ -100,7 +100,7 @@ if(incoming=="Arduino 1 get start")
       digitalWrite(OutputLedPin,HIGH);
 
   //sent to center arduino that the experiment is finished 
-      char message[] = "finish";
+     char message[] = "finish";
      uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
      memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);    
      memcpy(data_send, message, strlen(message));
