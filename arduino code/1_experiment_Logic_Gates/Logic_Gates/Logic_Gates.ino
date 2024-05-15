@@ -51,10 +51,11 @@ void setup() {
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay 
 
+}
 
 
-
-void loop() {
+void loop() 
+{
    //Rx code receive code from center arduino
   
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];  // Buffer to hold incoming data
@@ -133,7 +134,7 @@ if(incoming=="Arduino 1 get start")
 
 }
 
- 
-  
-  
 }
+  
+  
+
