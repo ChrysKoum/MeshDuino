@@ -45,7 +45,8 @@ The purpose of this project really was to create an application that used a song
 - GitHub (Proejct and Issues)
 
 ### Significant Changes
-This project required me to utilize many different aspects of what I learned so far in the last 2 Months. I incorporated Modules like yt-dlp and pygame to assist in Downloading Audio Files and Playing them respectively. Instead of traditional Object-oriented way of Programming in tkinter (using CLASSES etc) , i tried to make things as simple as Possible.
+This project required me to utilize many different aspects of what I learned so far in the last 2 Months. I incorporated Modules like yt-dlp and 
+ to assist in Downloading Audio Files and Playing them respectively. Instead of traditional Object-oriented way of Programming in tkinter (using CLASSES etc) , i tried to make things as simple as Possible.
 
 ### Challenges
 - There were significant challenges on this project that had a lot to do with traversing the unknown. Firstly, after i decided NOT to use the Object-oriented Programming approach for the GUI. For a while i was left Confused, because it was not one single gui i was working with, it was a group of many Nested GUI's combined together. though after waiting for someone to answer my questions on stackoverflow (which no one did to this date). I started figuring it out in my Way, Hopefully i was Able to Link all the GUI's with each other. (probably after creating a lot of mess in the code)
