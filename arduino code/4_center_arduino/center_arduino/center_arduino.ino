@@ -35,23 +35,40 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     char command = Serial.read();
-     sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
-     delay(2000);
     if (command == '1') {
-     
+      Serial.println("Experiment 1 Start");
+      
+      // Wait for the "Experiment 1 Finish" message
+      while (true) {
+        sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
+        String receivedMessage = receiveMessage();
+        if (receivedMessage == "Experiment 1 Finish") {
+          Serial.println("Experiment 1 Finish");
+          break;
+        }
+      }
     } else if (command == '2') {
-      if (receiveMessage() == "finish") {
-        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
+      // Wait for the "Experiment 1 Finish" message
+        Serial.println("Experiment 2 Start");
+      while (true) {
+        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_1);
+        String receivedMessage = receiveMessage();
+        if (receivedMessage == "Experiment 2 Finish") {
+          Serial.println("Experiment 2 Finish");
+          break;
+        }
       }
     } else if (command == '3') {
-      if (receiveMessage() == "finish") {
+        Serial.println("Experiment 3 Start");
+        while (true) {
         sendMessage("Arduino 3 get start", DESTINATION_ADDRESS_3);
+        String receivedMessage = receiveMessage();
+        if (receivedMessage == "Experiment 3 Finish") {
+          Serial.println("Experiment 3 Finish");
+          break;
+        }
       }
-    } else if (command == '4') {
-      if (receiveMessage() == "finish") {
-        Serial.println("end");
-      }
-    }
+    } 
   }
 }
 

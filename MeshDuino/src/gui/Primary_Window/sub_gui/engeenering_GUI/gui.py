@@ -2,18 +2,42 @@ import tkinter as tk
 from tkinter import Canvas, Text, simpledialog
 from PIL import Image, ImageTk
 import random
-import time
 import serial
 import pygame
+import time
 from threading import Thread, Event
 from pathlib import Path
 import sys
-from backend.maze_handler.character import Character
-from backend.maze_handler.graph import Graph
+from utils.character import Character
+from utils.graph import Graph
+# from backend.maze_handler.character import Character
+# from backend.maze_handler.graph import Graph
 
 # Define the relative_to_assets function
 def relative_to_assets(path: str) -> Path:
     return Path(__file__).parent / "assets" / Path(path)
+
+def make_arduino_connection(port, baudrate):
+    try:
+        arduino_serial = serial.Serial(port, baudrate)
+        time.sleep(2)  # Wait for the connection to establish
+        return arduino_serial
+    except serial.SerialException:
+        print("Port not open. Stopping the application.")
+        sys.exit()
+
+def send_command_and_wait_for_response(command, expected_response, arduino_serial):
+    print(f"Sending command: {command}")
+    arduino_serial.write(command.encode())
+
+    response = ""
+    while True:
+        if arduino_serial.inWaiting() > 0:
+            response = arduino_serial.readline().decode('utf-8').strip()
+            print(f"Received response: {response}")
+            if response == expected_response:
+                break
+    return response
 
 class LogicGateApp(tk.Toplevel):
     def __init__(self, master, switch_to_maze_app):
@@ -27,22 +51,13 @@ class LogicGateApp(tk.Toplevel):
 
         self.load_images()
         self.create_widgets()
-        self.start_time = time.time()
 
         self.arduino_serial = None
         try:
-            self.arduino_serial = serial.Serial('COM11', 9600)
+            self.arduino_serial = serial.Serial('COM9', 9600)
         except serial.SerialException:
-            print("Port not open. Is this a test? (yes/no)")
-            user_input = input().strip().lower()
-            if user_input == 'yes':
-                self.is_test = True
-            else:
-                print("Stopping the application.")
-                self.is_test = False
-                self.destroy()
-        else:
-            self.is_test = False
+            print("Port not open. Stopping the application.")
+            self.destroy()
 
         self.pause_event = Event()
         self.pause_event.set()
@@ -50,14 +65,14 @@ class LogicGateApp(tk.Toplevel):
     def load_images(self):
         self.schematic_image = Image.open(relative_to_assets("logic_gate_schematic.png"))
         self.schematic_photo = ImageTk.PhotoImage(self.schematic_image)
-
+        
     def create_widgets(self):
         self.canvas.create_image(50, 50, image=self.schematic_photo, anchor=tk.NW)
 
-        self.output_text = Text(self, height=10, width=30, state=tk.DISABLED)
+        self.output_text = tk.Text(self, height=10, width=30, state=tk.DISABLED)
         self.canvas.create_window(600, 170, window=self.output_text)
 
-        self.terminal_text = Text(self, height=10, width=80, state=tk.DISABLED)
+        self.terminal_text = tk.Text(self, height=10, width=80, state=tk.DISABLED)
         self.canvas.create_window(400, 400, window=self.terminal_text)
 
         self.read_serial_button = tk.Button(self, text="Start Experiment 1", command=self.start_experiment_1,
@@ -85,14 +100,9 @@ class LogicGateApp(tk.Toplevel):
         self.output_text.insert(tk.END, experiment_text)
         self.output_text.config(state=tk.DISABLED)
 
-        if self.is_test:
-            print("Simulating sending command to Arduino...")
-            print("Start Experiment 1\n" + experiment_text)
-            self.log_to_terminal(f"Start Experiment 1\n{experiment_text}")
-            Thread(target=self.simulate_experiment_success).start()
-        else:
-            self.send_experiment_command(selected_gates, input_states)
-            self.monitor_serial_for_success()
+        self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
+        self.send_experiment_command(selected_gates, input_states)
+        self.monitor_serial_for_success()
 
     def send_experiment_command(self, gates, states):
         command = "Start Experiment 1\n" + "\n".join([f"{gate}:{state}" for gate, state in zip(gates, states)])
@@ -105,21 +115,16 @@ class LogicGateApp(tk.Toplevel):
                 if self.arduino_serial.in_waiting > 0:
                     my_data = self.arduino_serial.readline().decode().strip()
                     self.log_to_terminal(my_data)
-                    if "Experiment 1 Success" in my_data:
+                    if "Experiment 1 Finish" in my_data:
                         self.display_success_message()
                         break
 
         self.serial_thread = Thread(target=read_serial, daemon=True)
         self.serial_thread.start()
 
-    def simulate_experiment_success(self):
-        time.sleep(5)
-        self.log_to_terminal("Experiment 1 Success")
-        self.display_success_message()
-
     def display_success_message(self):
         self.output_text.config(state=tk.NORMAL)
-        self.output_text.insert(tk.END, "\nExperiment 1 Success")
+        self.output_text.insert(tk.END, "\nExperiment 1 Finish")
         self.output_text.config(state=tk.DISABLED)
 
         self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
@@ -132,22 +137,6 @@ class LogicGateApp(tk.Toplevel):
         self.terminal_text.insert(tk.END, message + '\n')
         self.terminal_text.config(state=tk.DISABLED)
         self.terminal_text.see(tk.END)
-
-    def simulate_arduino_input(self):
-        gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
-        gate = random.choice(gates)
-        output = random.choice(['HIGH', 'LOW'])
-        simulated_data = f"Gate: {gate}, Output: {output}\n"
-
-        self.output_text.config(state=tk.NORMAL)
-        self.output_text.insert(tk.END, simulated_data)
-        self.output_text.config(state=tk.DISABLED)
-
-        self.after(1000, self.simulate_arduino_input)  # Simulate new input every second
-
-        # Example condition to switch to the next app
-        if len(self.output_text.get("1.0", tk.END).strip().split('\n')) > 10:
-            self.switch_to_maze_app()
 
 
 class MazeApp(tk.Toplevel):
@@ -180,9 +169,13 @@ class MazeApp(tk.Toplevel):
 
     def start_maze_game(self):
         self.start_button.destroy()
-        Thread(target=self.run_maze_game).start()
+        self.run_maze_game()
 
     def run_maze_game(self):
+        # Run Pygame in a separate thread
+        Thread(target=self.run_pygame_maze_game, daemon=True).start()
+
+    def run_pygame_maze_game(self):
         import os
 
         def set_window_position(x, y):
@@ -315,16 +308,8 @@ class MorseApp(tk.Toplevel):
         try:
             self.arduino_serial = serial.Serial('COM11', 9600)
         except serial.SerialException:
-            print("Port not open. Is this a test? (yes/no)")
-            user_input = input().strip().lower()
-            if user_input == 'yes':
-                self.is_test = True
-            else:
-                print("Stopping the application.")
-                self.is_test = False
-                self.destroy()
-        else:
-            self.is_test = False
+            print("Port not open. Stopping the application.")
+            self.destroy()
 
         self.pause_event = Event()
         self.pause_event.set()
@@ -357,14 +342,8 @@ class MorseApp(tk.Toplevel):
         self.output_text.insert(tk.END, word)
         self.output_text.config(state=tk.DISABLED)
 
-        if self.is_test:
-            print("Simulating sending command to Arduino...")
-            print("Start Experiment 3\n" + word)
-            self.log_to_terminal(f"Start Experiment 3\n{word}")
-            Thread(target=self.simulate_experiment_success).start()
-        else:
-            self.send_experiment_command(word)
-            self.monitor_serial_for_success()
+        self.send_experiment_command(word)
+        self.monitor_serial_for_success()
 
     def generate_random_word(self, length=5):
         letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -388,11 +367,6 @@ class MorseApp(tk.Toplevel):
         self.serial_thread = Thread(target=read_serial, daemon=True)
         self.serial_thread.start()
 
-    def simulate_experiment_success(self):
-        time.sleep(5)
-        self.log_to_terminal("Experiment 3 Success")
-        self.display_success_message()
-
     def display_success_message(self):
         self.output_text.config(state=tk.NORMAL)
         self.output_text.insert(tk.END, "\nExperiment 3 Success")
@@ -410,19 +384,20 @@ def Engeenering(parent):
     def switch_to_maze_app():
         logic_gate_app.destroy()
         global maze_app
-        maze_app = MazeApp(parent, switch_to_morse_app)
+        maze_app = MazeApp(parent, switch_to_morse_app(serial_port))
         maze_app.mainloop()
 
-    def switch_to_morse_app():
+    def switch_to_morse_app(serial_port):
         maze_app.destroy()
         global morse_app
-        morse_app = MorseApp(parent, finish_callback)
+        morse_app = MorseApp(parent, finish_callback(serial_port))
         morse_app.mainloop()
 
-    def finish_callback():
+    def finish_callback(serial_port):
         morse_app.destroy()
         end_time = time.time()
         duration = end_time - start_time
+        print(f"Total time taken for the whole process: {duration:.2f} seconds")
         name = simpledialog.askstring("Input", "Enter your team name:")
         if name:
             with open("results.txt", "a") as file:
@@ -430,7 +405,8 @@ def Engeenering(parent):
 
     start_time = time.time()
     global logic_gate_app
-    logic_gate_app = LogicGateApp(parent, switch_to_maze_app)
+    serial_port = make_arduino_connection('COM9', 9600)
+    logic_gate_app = LogicGateApp(parent, switch_to_maze_app(serial_port))
     logic_gate_app.mainloop()
 
 
