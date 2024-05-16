@@ -26,7 +26,7 @@ start_time = time.time()
 # Gates list and selection of 4 random gates
 gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
 selected_gates = random.sample(gates, 4)
-
+selected_gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate']  # For testing purposes    
 # Experiment 1: Send '1' to start, then send each selected gate command sequentially
 send_command_and_wait_for_response('1', "Experiment 1 Start", arduino_serial)
 for i, gate in enumerate(selected_gates, 1):
