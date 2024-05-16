@@ -8,8 +8,60 @@
 
 RF22Router rf22(MY_ADDRESS); // Initiate the RF22 with the sender's address
 
+int tonePin = 2;
+int toneFreq = 1000;
+int ledPin = 13;
+int buttonPin = 8;
+int debounceDelay = 90;
+
+int dotLength = 240;
+// dotLength = basic unit of speed in milliseconds
+// 240 gives 5 words per minute (WPM) speed.
+// WPM = 1200/dotLength.
+// For other speeds, use dotLength = 1200/(WPM)
+//
+// Other lengths are computed from dot length
+int dotSpace = dotLength;
+int dashLength = dotLength * 4;
+int letterSpace = dotLength * 3;
+int wordSpace = dotLength * 7;
+float wpm = 1200. / dotLength;
+
+int t1, t2, onTime, gap;
+bool newLetter, newWord, letterFound, keyboardText;
+int lineLength = 0;
+int maxLineLength = 20;
+
+char *letters[] =
+    {
+        ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", // A-I
+        ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", // J-R
+        "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."};       // S-Z
+
+char *numbers[] =
+    {
+        "-----", ".----", "..---", "...--", "....-", // 0-4
+        ".....", "-....", "--...", "---..", "----." // 5-9
+    };
+
+String dashSeq = "";
+char keyLetter, ch;
+int i, index;
+String decodedLetters = ""; // Holds all decoded letters
+int number_of_bytes = 0;    // will be needed to measure bytes of message
+
+float throughput = 0; // will be needed for measuring throughput
+int flag_measurement = 0;
+
+int counter = 0;
+int initial_time = 0;
+int final_time = 0;
+bool k = true;
+
+
 void setup() {
     delay(500);
+    
     Serial.begin(9600);
     Serial.println();
     Serial.println("-------------------------------");
@@ -29,8 +81,15 @@ void setup() {
     rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
     delay(1000); // delay for 1 s
 
+
+    newLetter = false; // if false, do NOT check for end of letter gap
+    newWord = false;   // if false, do NOT check for end of word gap
+    keyboardText = false;
+
     Serial.println("Setup complete.");
 }
+
+
 
 void loop() {
     // Check for received message
