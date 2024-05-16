@@ -61,6 +61,7 @@ void setup() {
 
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
+  Serial.println("Set up complete");
 }
 
 void loop() {
@@ -195,7 +196,7 @@ void performGateOperation() {
         digitalWrite(OutputLedPin, LOW);
       }
     }
-    highSequence = (highSequence + 1) % 4;
+    highSequenceIndex = (highSequenceIndex + 1) % 4;
 
     // Print the highSequence array
     Serial.print("High Sequence: ");
