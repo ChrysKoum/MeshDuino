@@ -83,12 +83,12 @@ void loop() {
       handleGateCommand(incoming, gateIndex);
       gateIndex++;
     }
-    if(gateIndex == 4){
+    if(gateIndex == 5){
       sendMessage("Experiment 1 Finish");
       gateIndex = 1;
     }
   }
-}
+} //loop
 
 void handleGateCommand(const char* gate, int gateIndex) {
   Serial.print("Gate command received: ");
@@ -112,4 +112,5 @@ void sendMessage(const char* message) {
   } else {
     Serial.println("sendtoWait Successful");
   }
+  
 }

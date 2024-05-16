@@ -58,6 +58,7 @@ void setup() {
 }
 
 void loop() {
+
   // Rx code receive code from center Arduino
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];  // Buffer to hold incoming data
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
@@ -87,6 +88,7 @@ void loop() {
       handleGateOperation();
     }
   }
+  
 }
 
 void sendFinishMessage() {
@@ -121,6 +123,7 @@ void handleGateOperation() {
   } else if (GateSelected == OrGate) {
     if (button1State == HIGH || button2State == HIGH) digitalWrite(OutputLedPin, HIGH); else digitalWrite(OutputLedPin, LOW);
   } else if (GateSelected == AndGate) {
+    
     if (button1State == HIGH && button2State == HIGH) {
       digitalWrite(OutputLedPin, HIGH);
       sendFinishMessage();
