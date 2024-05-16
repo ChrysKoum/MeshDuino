@@ -26,6 +26,7 @@ const int XnorGate = 10;
 int button1State = 0;         // variable for reading the pushbutton status
 int button2State = 0;
 int GateSelected = 4;          // not gate selected by default
+int gateIndex = 1;
 
 void setup() {
   Serial.begin(9600);
@@ -78,12 +79,18 @@ void loop() {
 
     if (strcmp(incoming, "Arduino 1 get start") != 0) {
       // It's a gate command, handle it
-      handleGateCommand(incoming);
+      
+      handleGateCommand(incoming, gateIndex);
+      gateIndex++;
+    }
+    if(gateIndex == 4){
+      sendMessage("Experiment 1 Finish");
+      gateIndex = 1;
     }
   }
 }
 
-void handleGateCommand(const char* gate) {
+void handleGateCommand(const char* gate, int gateIndex) {
   Serial.print("Gate command received: ");
   Serial.println(gate);
 
@@ -91,10 +98,7 @@ void handleGateCommand(const char* gate) {
   delay(4000);
 
   // Determine gate index and send completion message
-  static int gateIndex = 1;
   String response = "Gate " + String(gateIndex) + " Completed";
-  gateIndex++;
-
   sendMessage(response.c_str());
 }
 

@@ -4,13 +4,13 @@
 
 #define MY_ADDRESS 0 // define my unique address
 #define DESTINATION_ADDRESS_1 1 // define who I can talk to
+#define DESTINATION_ADDRESS_2 2 // define who I can talk to
+#define DESTINATION_ADDRESS_3 3 // define who I can talk to
 
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 void setup() {
-
-
   Serial.begin(9600); // to be able to view the results in the computer's monitor
 
   if (!rf22.init()) { // initialize my radio
@@ -28,9 +28,9 @@ void setup() {
   
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
+  rf22.addRouteTo(DESTINATION_ADDRESS_2, DESTINATION_ADDRESS_2);
+  rf22.addRouteTo(DESTINATION_ADDRESS_3, DESTINATION_ADDRESS_3);
 }
-
-
 
 void loop() {
   if (Serial.available() > 0) {
@@ -70,7 +70,7 @@ void loop() {
     } else if (command == '2') {
       Serial.println("Experiment 2 Start");
       while (true) {
-        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_1);
+        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
         String receivedMessage = receiveMessage();
         if (receivedMessage == "Experiment 2 Finish") {
           Serial.println("Experiment 2 Finish");
@@ -79,8 +79,20 @@ void loop() {
       }
     } else if (command == '3') {
       Serial.println("Experiment 3 Start");
+      sendMessage("Experiment 3 Start", DESTINATION_ADDRESS_3);
+
+      // Wait for the word that needs decoding
       while (true) {
-        sendMessage("Arduino 3 get start", DESTINATION_ADDRESS_3);
+        if (Serial.available()) {
+          String wordToDecode = Serial.readStringUntil('\n');
+          wordToDecode.trim();
+          sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
+          break;
+        }
+      }
+
+      // Wait for the "Experiment 3 Finish" message
+      while (true) {
         String receivedMessage = receiveMessage();
         if (receivedMessage == "Experiment 3 Finish") {
           Serial.println("Experiment 3 Finish");
@@ -89,11 +101,9 @@ void loop() {
       }
     }
   }
-}//loop end 
-
+}
 
 void sendMessage(const char* message, uint8_t destination) {
-
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
@@ -104,11 +114,9 @@ void sendMessage(const char* message, uint8_t destination) {
     Serial.println("sendtoWait Successful");
   }
   delay(1000);
-
 }
 
 String receiveMessage() {
-  
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
