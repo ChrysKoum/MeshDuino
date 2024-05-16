@@ -60,6 +60,7 @@ bool k = true;
 
 void setup() {
     delay(500);
+    
     Serial.begin(9600);
     Serial.println();
     Serial.println("-------------------------------");
@@ -79,8 +80,15 @@ void setup() {
     rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
     delay(1000); // delay for 1 s
 
+
+    newLetter = false; // if false, do NOT check for end of letter gap
+    newWord = false;   // if false, do NOT check for end of word gap
+    keyboardText = false;
+
     Serial.println("Setup complete.");
 }
+
+
 
 void loop() {
     // Check for received message
