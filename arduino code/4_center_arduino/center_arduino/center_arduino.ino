@@ -104,38 +104,52 @@ void loop() {
   }
 }
 
-void sendMessage(const char* message, uint8_t destination) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memcpy(data_send, message, strlen(message));
-  
-  if (rf22.sendtoWait(data_send, strlen(message), destination) != RF22_ROUTER_ERROR_NONE) {
-    Serial.println("sendtoWait failed");
-  } else {
-    Serial.println("sendtoWait Successful");
-  }
-  delay(1000);
+void sendMessage(const char *message, uint8_t destination) {
+    uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+    memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memcpy(data_send, message, strlen(message));
+    
+    Serial.println("Attempting to send finish message...");
+
+    bool success = false;
+    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
+        Serial.print("Attempt ");
+        Serial.println(attempt + 1);
+        if (rf22.sendtoWait(data_send, strlen(message), destination) == RF22_ROUTER_ERROR_NONE) {
+            Serial.println("sendtoWait Successful");
+            success = true;
+            break;
+        } else {
+            Serial.println("sendtoWait failed");
+        }
+        delay(1000); // Wait 1 second before retrying
+    }
+
+    if (!success) {
+        Serial.println("Failed to send finish message after 3 attempts.");
+    }
 }
 
 String receiveMessage() {
-  uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
-  char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  uint8_t len = sizeof(buf);
-  uint8_t from;
-  
-  if (rf22.recvfromAck(buf, &len, &from)) {
-    buf[len] = '\0';
-    memcpy(incoming, buf, len + 1);
-    
-    Serial.print("Message received from address: ");
-    Serial.println(from, DEC);
-    Serial.print("Message: ");
-    Serial.println(incoming);
-    delay(1000);
-    
-    return String(incoming);
-  }
-  return "";
+    uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
+    char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
+    memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    uint8_t len = sizeof(buf);
+    uint8_t from;
+
+    if (rf22.recvfromAck(buf, &len, &from)) {
+        buf[len] = '\0';
+        memcpy(incoming, buf, len + 1);
+
+        Serial.print("Message received from address: ");
+        Serial.println(from, DEC);
+        Serial.print("Message: ");
+        Serial.println(incoming);
+
+        return String(incoming);
+    }
+    return "";
 }
+
+

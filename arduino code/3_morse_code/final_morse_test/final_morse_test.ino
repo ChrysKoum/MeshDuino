@@ -80,10 +80,24 @@ void sendFinishMessage(const char *message) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
     memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
     memcpy(data_send, message, strlen(message));
+    
+    Serial.println("Attempting to send finish message...");
 
-    if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
-        Serial.println("sendtoWait failed");
-    } else {
-        Serial.println("sendtoWait Successful");
+    bool success = false;
+    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
+        Serial.print("Attempt ");
+        Serial.println(attempt + 1);
+        if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
+            Serial.println("sendtoWait Successful");
+            success = true;
+            break;
+        } else {
+            Serial.println("sendtoWait failed");
+        }
+        delay(1000); // Wait 1 second before retrying
+    }
+
+    if (!success) {
+        Serial.println("Failed to send finish message after 3 attempts.");
     }
 }
