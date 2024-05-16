@@ -34,7 +34,6 @@ int highSequenceIndex = 0;
 // Variables to track the HIGH HIGH HIGH or LOW LOW LOW sequence
 int sequence[3] = {0, 0, 0};
 int sequenceIndex = 0;
-int cnt=0;
 
 void setup() {
   Serial.begin(9600);
@@ -122,7 +121,6 @@ void handleGateCommand(const char* gate, int gateIndex) {
   // Send completion message
   String response = "Gate " + String(gateIndex) + " Completed";
   sendMessage(response.c_str());
-
 }
 
 void performGateOperation() {
@@ -133,39 +131,33 @@ void performGateOperation() {
   }
   digitalWrite(GateSelected, HIGH);
 
-  while(true) {
-         
+  while (true) {
+    // read the state of the pushbutton value every 1 second:
+    delay(1000);
     button1State = digitalRead(button1Pin);
 
-Serial.println(button1State);
+    // Update the highSequence array
+    sequence[SequenceIndex] = button1State;
+    SequenceIndex = (SequenceIndex + 1) % 3;
 
-    while(button1State == LOW && cnt>0){
-        
-
-      button1State = digitalRead(button1Pin);
-       //Serial.println(button1State);
-      if(button1State == HIGH){
-      
-        break;
-      }
-      
+    // Update the sequence array based on the current highSequence
+    if (sequence[0] == HIGH && sequence[1] == HIGH && sequence[2] == HIGH ) {
+      tempSequence = HIGH;
+    } else if (sequence[0] == LOW && sequence[1] == LOW && sequence[2] == LOW) {
+      tempSequence = LOW;
+    } else {
+      tempSequence = -1; // Indicate a mixed sequence
     }
-    if(cnt==1) cnt=0;
-    else  cnt++;
-
-    button2State = digitalRead(button2Pin);
-
-    // Update the sequence array
-    sequence[sequenceIndex] = button1State;
-    sequenceIndex = (sequenceIndex + 1) % 4;
-
-    delay(1000);
 
     // Check the gate selected and perform action accordingly:
     if (GateSelected == NotGate) {
-      if (button1State == HIGH) digitalWrite(OutputLedPin, LOW);
-       else digitalWrite(OutputLedPin, HIGH);
-
+      if (tempSequence == HIGH) {
+        digitalWrite(OutputLedPin, LOW);
+        highSequence[highSequenceIndex] = LOW;
+      } else {
+        digitalWrite(OutputLedPin, HIGH);
+        highSequence[highSequenceIndex] = HIGH;
+      }
     } else if (GateSelected == OrGate) {
       if (button1State == HIGH || button2State == HIGH) {
         digitalWrite(OutputLedPin, HIGH);
