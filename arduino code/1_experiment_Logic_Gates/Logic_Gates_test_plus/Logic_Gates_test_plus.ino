@@ -137,8 +137,8 @@ void performGateOperation() {
     button1State = digitalRead(button1Pin);
 
     // Update the highSequence array
-    sequence[SequenceIndex] = button1State;
-    SequenceIndex = (SequenceIndex + 1) % 3;
+    sequence[sequenceIndex] = button1State;
+    sequenceIndex = (sequenceIndex + 1) % 3;
 
     // Update the sequence array based on the current highSequence
     if (sequence[0] == HIGH && sequence[1] == HIGH && sequence[2] == HIGH ) {
