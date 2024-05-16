@@ -40,16 +40,15 @@ if 1 == 2:
 # Experiment 3: Send '3' to start, send a random 5-letter word, and wait for finish
 send_command_and_wait_for_response('3', "Experiment 3 Start", arduino_serial)
 
+time.sleep(2)  # Wait for the connection to establish
+
 # Pick a random 5-letter word
-words = ['apple', 'grape', 'peach', 'lemon', 'berry']
+words = ['APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY']
 selected_word = random.choice(words)
 print(f"Selected word for decoding: {selected_word}")
 
-# Send the selected word to the Arduino
-arduino_serial.write(selected_word.encode())
-
 # Wait for "Experiment 3 Finish" message
-send_command_and_wait_for_response('', "Experiment 3 Finish", arduino_serial)
+send_command_and_wait_for_response(selected_word, "Experiment 3 Finish", arduino_serial)
 print("Experiment 3 finished.")
 
 # End timing the whole process

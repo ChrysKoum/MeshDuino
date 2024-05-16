@@ -239,13 +239,6 @@ void loop()
         // Reset for next input
         newLetter = false;
         dashSeq = "";
-
-        // Check if the sequence is completed
-        if (decodedLetters.endsWith("AE")) { // Update this condition as per your requirement
-            Serial.println(" Success");
-            decodedLetters = ""; // Optionally reset the decoded sequence
-            sendFinishMessage("Experiment 3 Finish");
-        }
     }
 
     // keyed letter has been identified and printed
