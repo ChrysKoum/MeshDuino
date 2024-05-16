@@ -53,6 +53,19 @@ void loop() {
 
         if (strcmp(incoming, "Experiment 3 Start") == 0) {
             delay(5000); // Delay for 5 seconds
+
+            // Wait for the word to decode
+            while (true) {
+                if (rf22.recvfromAck(buf, &len, &from)) {
+                    buf[len] = '\0';
+                    memcpy(incoming, buf, len + 1);
+                    Serial.print("Word to decode: ");
+                    Serial.println(incoming); // Display the word to decode
+                    break;
+                }
+            }
+
+            delay(5000); // Delay for another 5 seconds
             sendFinishMessage("Experiment 3 Finish");
         }
     }
