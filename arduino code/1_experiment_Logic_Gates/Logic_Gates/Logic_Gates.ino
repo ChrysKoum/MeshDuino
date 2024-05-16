@@ -9,8 +9,8 @@
 RF22Router rf22(MY_ADDRESS);
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 2;     // the number of the pushbutton pin
-const int button2Pin = 3;     // the number of the pushbutton pin
+const int button1Pin = 3;     // the number of the pushbutton pin
+const int button2Pin = 11 ;     // the number of the pushbutton pin
 
 const int OutputLedPin =  13;      // the number of the Output LED pin
 
