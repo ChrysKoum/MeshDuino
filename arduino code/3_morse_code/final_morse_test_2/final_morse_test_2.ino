@@ -121,10 +121,11 @@ void loop() {
     String receivedMessage = receiveMessage();
 
     if (receivedMessage == "Experiment 3 Start") {
+        String wordToDecode = receiveMessage();
 
         // Wait for the word to decode
         while (true) {
-            String wordToDecode = receiveMessage();
+            wordToDecode = receiveMessage();
             if (wordToDecode != "") {
                 Serial.print("Word to decode: ");
                 Serial.println(wordToDecode); // Display the word to decode
