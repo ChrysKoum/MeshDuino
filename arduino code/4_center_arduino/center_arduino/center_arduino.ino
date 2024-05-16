@@ -4,8 +4,6 @@
 
 #define MY_ADDRESS 0 // define my unique address
 #define DESTINATION_ADDRESS_1 1 // define who I can talk to
-#define DESTINATION_ADDRESS_2 2 // define who I can talk to
-#define DESTINATION_ADDRESS_3 3 
 
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
@@ -28,20 +26,37 @@ void setup() {
   
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
-  rf22.addRouteTo(DESTINATION_ADDRESS_2, DESTINATION_ADDRESS_2);
-  rf22.addRouteTo(DESTINATION_ADDRESS_3, DESTINATION_ADDRESS_3);
 }
 
 void loop() {
-  
   if (Serial.available() > 0) {
     char command = Serial.read();
     if (command == '1') {
       Serial.println("Experiment 1 Start");
-      
-      // Wait for the "Experiment 1 Finish" message
+
+      // Send gate commands and wait for responses
+      for (int i = 0; i < 4; i++) {
+        // Wait for gate command from Serial (from Python script)
+        while (!Serial.available()) { delay(10); }
+        String gate = Serial.readStringUntil('\n');
+        gate.trim();
+
+        // Send the gate command to the first Arduino
+        sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
+
+        // Wait for the corresponding "Gate Completed" response
+        String expectedResponse = "Gate " + String(i+1) + " Completed";
+        while (true) {
+          String receivedMessage = receiveMessage();
+          if (receivedMessage == expectedResponse) {
+            Serial.println(receivedMessage); // Print so Python can read it
+            break;
+          }
+        }
+      }
+
+      // Finally, wait for the "Experiment 1 Finish" message
       while (true) {
-        sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
         String receivedMessage = receiveMessage();
         if (receivedMessage == "Experiment 1 Finish") {
           Serial.println("Experiment 1 Finish");
@@ -49,8 +64,7 @@ void loop() {
         }
       }
     } else if (command == '2') {
-      // Wait for the "Experiment 1 Finish" message
-        Serial.println("Experiment 2 Start");
+      Serial.println("Experiment 2 Start");
       while (true) {
         sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_1);
         String receivedMessage = receiveMessage();
@@ -60,8 +74,8 @@ void loop() {
         }
       }
     } else if (command == '3') {
-        Serial.println("Experiment 3 Start");
-        while (true) {
+      Serial.println("Experiment 3 Start");
+      while (true) {
         sendMessage("Arduino 3 get start", DESTINATION_ADDRESS_3);
         String receivedMessage = receiveMessage();
         if (receivedMessage == "Experiment 3 Finish") {
@@ -69,7 +83,7 @@ void loop() {
           break;
         }
       }
-    } 
+    }
   }
 }
 
