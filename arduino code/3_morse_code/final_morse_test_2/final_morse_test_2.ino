@@ -1,12 +1,4 @@
-in this code when i remove this lines 
-    pinMode(ledPin, OUTPUT);
-    pinMode(tonePin, OUTPUT);
-    pinMode(buttonPin, INPUT_PULLUP);
 
-my arduino can receive 
-this message // Check for received message
-    String receivedMessage = receiveMessage();
-why fix it
 #include <SPI.h>
 #include <RF22.h>
 #include <RF22Router.h>
@@ -119,8 +111,134 @@ void loop() {
             }
         }
 
-        delay(5000); // Delay for another 5 seconds
-        sendFinishMessage("Experiment 3 Finish");
+
+        if (Serial.available() > 0) {
+        if (keyboardText == false) {
+            Serial.println();
+            Serial.println("-------------------------------");
+        }
+        keyboardText = true;
+        ch = Serial.read();
+        if (ch >= 'a' && ch <= 'z') {
+            ch = ch - 32;
+        }
+
+        if (ch >= 'A' && ch <= 'Z') {
+            Serial.print(ch);
+            Serial.print(" ");
+            Serial.println(letters[ch - 'A']);
+            flashSequence(letters[ch - 'A']);
+            delay(letterSpace);
+        }
+        if (ch >= '0' && ch <= '9') {
+            Serial.print(ch);
+            Serial.print(" ");
+            Serial.println(numbers[ch - '0']);
+            flashSequence(numbers[ch - '0']);
+            delay(letterSpace);
+        }
+        if (ch == ' ') {
+            Serial.println("_");
+            delay(wordSpace);
+        }
+
+        // Print a header after last keyboard text
+        if (Serial.available() <= 0) {
+            Serial.println();
+            Serial.println("Enter text or Key in:");
+            Serial.println("-------------------------------");
+            keyboardText = false;
+        }
+    }
+
+    if (digitalRead(buttonPin) == HIGH) { // button is pressed
+        newLetter = true;
+        newWord = true;
+        t1 = millis(); // time at button press
+        digitalWrite(ledPin, HIGH); // turn on LED and tone
+        tone(tonePin, toneFreq);
+        delay(debounceDelay);
+        while (digitalRead(buttonPin) == HIGH) { // wait for button release
+            delay(debounceDelay);
+        }
+        delay(debounceDelay);
+
+        t2 = millis();  // time at button release
+        onTime = t2 - t1;  // length of dot or dash keyed in
+        digitalWrite(ledPin, LOW); // turn off LED and tone
+        noTone(tonePin);
+
+        // check if dot or dash
+        if (onTime <= dotLength * 1.5) { // allow for 50% longer
+            dashSeq += "."; // build dot/dash sequence
+        } else {
+            dashSeq += "-";
+        }
+    } // end button press section
+
+    // look for a gap >= letterSpace to signal end letter
+    // end of letter when gap >= letterSpace
+    gap = millis() - t2;
+    if (newLetter && gap >= letterSpace) {
+        letterFound = false;
+        keyLetter = '?'; // Default unknown letter
+
+        // Search for matching letter in Morse sequence array
+        for (int i = 0; i < 26; i++) {
+            if (dashSeq == letters[i]) {
+                keyLetter = char(i + 65); // Convert index to ASCII character
+                letterFound = true;
+                break;
+            }
+        }
+
+        // Now check numbers if no letter was found
+        if (!letterFound) {
+            for (int i = 0; i < 10; i++) {
+                if (dashSeq == numbers[i]) {
+                    keyLetter = char(i + 48); // Convert index to ASCII number
+                    letterFound = true;
+                    break;
+                }
+            }
+        }
+        // Output the found character
+        Serial.print(keyLetter);
+        decodedLetters += keyLetter; // Append this letter to the sequence
+
+        // Reset for next input
+        newLetter = false;
+        dashSeq = "";
+
+        // Check if the sequence is completed
+        if (decodedLetters.endsWith(wordToDecode)) { // Update this condition as per your requirement
+            Serial.println(" Success");
+            decodedLetters = ""; // Optionally reset the decoded sequence
+            sendFinishMessage("Experiment 3 Finish");
+        }
+    }
+
+    // keyed letter has been identified and printed
+
+    // when gap is >= wordSpace, insert space between words
+    // lengthen the word space by 50% to allow for variation
+    if (newWord == true && gap >= wordSpace * 3) {
+        newWord = false;
+        Serial.print("_");
+        lineLength = lineLength + 1;
+
+        // flash to indicate new word
+        digitalWrite(ledPin, HIGH);
+        delay(25);
+        digitalWrite(ledPin, LOW);
+    }
+
+    // insert linebreaks
+    if (lineLength >= maxLineLength) {
+        Serial.println();
+        lineLength = 0;
+    }
+        //sendFinishMessage("Experiment 3 Finish");
     }
 }
 
@@ -145,6 +263,30 @@ String receiveMessage() {
     }
     return "";
 }
+
+void flashSequence(char *sequence) {
+    int i = 0;
+    while (sequence[i] == '.' || sequence[i] == '-') {
+        flashDotOrDash(sequence[i]);
+        i++;
+    }
+}
+
+void flashDotOrDash(char dotOrDash) {
+    digitalWrite(ledPin, HIGH);
+    tone(tonePin, toneFreq);
+    if (dotOrDash == '.') {
+        delay(dotLength);
+    } else {
+        delay(dashLength);
+    }
+
+    digitalWrite(ledPin, LOW);
+    noTone(tonePin);
+    delay(dotLength);
+}
+
+
 
 void sendFinishMessage(const char *message) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
