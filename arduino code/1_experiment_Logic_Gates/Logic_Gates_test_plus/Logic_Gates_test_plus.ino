@@ -31,6 +31,7 @@ int gateIndex = 1;
 int sequence[4] = {0, 0, 0, 0};
 int sequenceIndex = 0;
 int cnt=0;
+
 void setup() {
   Serial.begin(9600);
 
@@ -122,6 +123,7 @@ void handleGateCommand(const char* gate, int gateIndex) {
   // Send completion message
   String response = "Gate " + String(gateIndex) + " Completed";
   sendMessage(response.c_str());
+
 }
 
 void performGateOperation() {
@@ -131,15 +133,14 @@ void performGateOperation() {
   digitalWrite(GateSelected, HIGH);
 
   while(true) {
-    
-   
-           
+         
     button1State = digitalRead(button1Pin);
 
 Serial.println(button1State);
 
     while(button1State == LOW && cnt>0){
         
+
       button1State = digitalRead(button1Pin);
        //Serial.println(button1State);
       if(button1State == HIGH){
@@ -163,6 +164,7 @@ Serial.println(button1State);
     if (GateSelected == NotGate) {
       if (button1State == HIGH) digitalWrite(OutputLedPin, LOW);
        else digitalWrite(OutputLedPin, HIGH);
+
     } else if (GateSelected == OrGate) {
       if (button1State == HIGH || button2State == HIGH) {
         digitalWrite(OutputLedPin, HIGH);
