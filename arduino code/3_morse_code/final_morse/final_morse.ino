@@ -293,6 +293,13 @@ void flashDotOrDash(char dotOrDash) {
 }
 
 void handleExperiment3() {
+    uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
+    char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
+    memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    uint8_t len = sizeof(buf); // Length of the incoming data
+    uint8_t from; // Variable to store the sender's address
+
     Serial.println("Experiment 3 Start");
 
     // Wait for the word to decode
