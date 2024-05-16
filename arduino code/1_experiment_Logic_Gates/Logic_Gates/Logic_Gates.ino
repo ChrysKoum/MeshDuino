@@ -84,16 +84,13 @@ void loop() {
 
       digitalWrite(OutputLedPin, HIGH);
 
-      // Send to center Arduino that the experiment is finished 
-      sendFinishMessage();
-
       handleGateOperation();
     }
   }
 }
 
 void sendFinishMessage() {
-  char message[] = "finish";
+  char message[] = "Experiment 1 Finish";
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));

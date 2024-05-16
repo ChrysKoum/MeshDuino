@@ -33,14 +33,7 @@ void setup() {
 }
 
 void loop() {
-
-sendMessage("Arduino 1 get start", DESTINATION_ADDRESS_1);
- delay(1000);
- Serial.println("sent");
-
- if (receiveMessage() == "finish")
-Serial.println("finito");
-
+  
   if (Serial.available() > 0) {
     char command = Serial.read();
     if (command == '1') {
