@@ -107,6 +107,7 @@ void loop() {
                 Serial.println(wordToDecode); // Display the word to decode
                 Serial.println("put the String"); // Display the word to decode
                 delay(2000);
+                while(true){
                 // Check to see if something has been entered on the keyboard
                 if (Serial.available() > 0) {
                     if (keyboardText == false) {
@@ -152,7 +153,7 @@ void loop() {
                     newWord = true;
                     t1 = millis(); // time at button press
                     digitalWrite(ledPin, HIGH); // turn on LED and tone
-                    tone(tonePin, toneFreq);
+                    
                     delay(debounceDelay);
                     while (digitalRead(buttonPin) == HIGH) { // wait for button release
                         delay(debounceDelay);
@@ -162,7 +163,7 @@ void loop() {
                     t2 = millis();  // time at button release
                     onTime = t2 - t1;  // length of dot or dash keyed in
                     digitalWrite(ledPin, LOW); // turn off LED and tone
-                    noTone(tonePin);
+                    
 
                     // check if dot or dash
                     if (onTime <= dotLength * 1.5) { // allow for 50% longer
@@ -236,7 +237,9 @@ void loop() {
                         Serial.println();
                         lineLength = 0;
                     }
-            }
+
+                }
+            }//while
         }
       }//while
     }
