@@ -8,7 +8,6 @@
 
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
-int received_value=0;
 
 
 const int FORCE_SENSOR_PIN=A1;
@@ -18,7 +17,6 @@ const int ECHO_PIN_RIGHT=12;
 const int TRIG_PIN_LEFT=11;
 const int ECHO_PIN_LEFT=10;
 
-#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 float duration_right,duration_left,distance_right,distance_left;
 
@@ -65,7 +63,7 @@ if (!rf22.init())
 
 void loop() {
 
-\\Rx code
+//Rx code
 
  uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
