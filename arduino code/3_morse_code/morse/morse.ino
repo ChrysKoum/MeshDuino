@@ -73,6 +73,8 @@ String decodedLetters = "";  // Holds all decoded letters
 
 void setup() 
 {
+
+  
   delay(500);
   pinMode(ledPin, OUTPUT);
   pinMode(tonePin, OUTPUT);
