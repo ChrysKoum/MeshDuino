@@ -84,8 +84,11 @@ int flag_measurement=0;
 int counter=0;
 int initial_time=0;
 int final_time=0;
+ bool k=true;
 void setup() 
 {
+ 
+
   delay(500);
   pinMode(ledPin, OUTPUT);
   pinMode(tonePin, OUTPUT);
@@ -106,7 +109,7 @@ void setup()
   if (!rf22.init()) // initialize my radio
     Serial.println("RF22 init failed");
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(439.0)) // set the desired frequency
+  if (!rf22.setFrequency(434.0)) // set the desired frequency
     Serial.println("setFrequency Fail");
   rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
   //1,2,5,8,11,14,17,20 DBM
@@ -167,14 +170,31 @@ void setup()
 void loop() 
 {//Rx code receive code from center arduino 
 
+
+
+
+
+
+
+  Serial.println("ΗΙ");
+  delay(1000);
+
+while(k==true )
+{    
+      Serial.println("VCVC");
+
+     delay(1000);
+
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
   memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   uint8_t len = sizeof(buf); // Length of the incoming data
   uint8_t from; // Variable to store the sender's address
-
   // Check if data is received
+
+ Serial.println(incoming);
+
   if (rf22.recvfromAck(buf, &len, &from)) {
     buf[len] = '\0'; // Ensure null-termination for proper string handling
     memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
@@ -184,13 +204,17 @@ void loop()
     Serial.print("Message: ");
     Serial.println(incoming); // Display the received message as a string
     delay(1000);
+    if(incoming=="Arduino 3 get start"){
+      k=false;}
+  }
 }
+
 
   
 // Check to see if something has been entered on the keyboard
 
   
-if (Serial.available() > 0 && incoming=="Arduino 3 get start")
+if (Serial.available() > 0)
   {
     if (keyboardText == false) 
     {
@@ -234,7 +258,7 @@ if (Serial.available() > 0 && incoming=="Arduino 3 get start")
      }
   }
  
-  if (digitalRead(buttonPin) == HIGH ) //button is pressed
+  if (digitalRead(buttonPin) == HIGH  ) //button is pressed
   {
     newLetter = true; 
     newWord = true;
@@ -305,7 +329,7 @@ if (Serial.available() > 0 && incoming=="Arduino 3 get start")
       initial_time = millis();
 
       // Replace sensorVal with a specific message
-      char message[] = "finish"; // Message to be sent
+      char message[] = "Experiment 1 Finish"; // Message to be sent
 
       Serial.print("Sending message: ");
       Serial.println(message); // Show the message on Serial Monitor
