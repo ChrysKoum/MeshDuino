@@ -23,11 +23,11 @@ float duration_right,duration_left,distance_right,distance_left;
  int forceValue=0;
 int lightValue=0;
 
+void sendMessage(const char* message);
+String receiveMessage();
+
 void setup() {
 
- 
-
-  
   pinMode(TRIG_PIN_RIGHT, OUTPUT);
   pinMode(ECHO_PIN_RIGHT, INPUT);
   
@@ -55,7 +55,7 @@ if (!rf22.init())
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
 
-
+   Serial.println("set up complete");
  
 }
 
@@ -63,27 +63,9 @@ if (!rf22.init())
 
 void loop() {
 
-//Rx code
+ String receivedMessage = receiveMessage();
 
- uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
-  char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
-  memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  uint8_t len = sizeof(buf); // Length of the incoming data
-  uint8_t from; // Variable to store the sender's address
-
-  // Check if data is received
-  if (rf22.recvfromAck(buf, &len, &from)) {
-    buf[len] = '\0'; // Ensure null-termination for proper string handling
-    memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
-
-    Serial.print("Message received from address: ");
-    Serial.println(from, DEC); // Display the sender's address
-    Serial.print("Message: ");
-    Serial.println(incoming); // Display the received message as a string
-    delay(1000);
-
-if(incoming=="Arduino 2 get start")
+if(receivedMessage=="Arduino 2 get start")
 {
  //for the right 
   digitalWrite(TRIG_PIN_RIGHT, LOW);
@@ -118,6 +100,7 @@ bool k=false;
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
+  sendMessage("Moving Right");
   // Add your code to move right here
    k=true;
   delay(1000);
@@ -127,6 +110,7 @@ bool k=false;
 if(distance_left < 100) {
   // Move left
   Serial.println("Moving Left");
+  sendMessage("Moving Left");
   // Add your code to move left here
   k=true;
   delay(1000);
@@ -136,6 +120,7 @@ if(distance_left < 100) {
 if (forceValue > 300) {
   // Move down
   Serial.println("Moving Down");
+  sendMessage("Moving Down");
   Serial.println(forceValue);
   // Add your code to move down here
   k=true;
@@ -146,6 +131,7 @@ if (forceValue > 300) {
 if (lightValue > 500) {
   // Move up
   Serial.println("Moving Up");
+  sendMessage("Moving Up");
   Serial.println(lightValue);
   // Add your code to move up here
   k=true;
@@ -157,6 +143,7 @@ if (lightValue > 500) {
 if (k==false) {
   // If none of the conditions are met
   Serial.println("Nothing");
+  sendMessage("No move");
   // Add your code for no movement here
   delay(1000);
 }
@@ -164,20 +151,42 @@ if (k==false) {
 }//end if from incoming
 
 
-   //Tx code sent to center arduino that finish the experiment 
- char message[] = "finish";
+  
+}//loop
+
+void sendMessage(const char* message) {
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);    
-  memcpy(data_send, message, strlen(message)); 
+  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memcpy(data_send, message, strlen(message));
 
   if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
     Serial.println("sendtoWait failed");
-  }
-  else {
+  } else {
     Serial.println("sendtoWait Successful");
   }
-  delay(1000);
-   
-   
-  
 }
+
+String receiveMessage() {
+    uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
+    char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
+    memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    uint8_t len = sizeof(buf);
+    uint8_t from;
+
+    if (rf22.recvfromAck(buf, &len, &from)) {
+        buf[len] = '\0';
+        memcpy(incoming, buf, len + 1);
+
+        Serial.print("Message received from address: ");
+        Serial.println(from, DEC);
+        Serial.print("Message: ");
+        Serial.println(incoming);
+
+        return String(incoming);
+    }
+    return "";
+}
+
+
+
