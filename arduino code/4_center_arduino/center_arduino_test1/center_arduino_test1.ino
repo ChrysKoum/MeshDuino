@@ -73,6 +73,11 @@ void loop() {
         sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
         String receivedMessage = receiveMessage();
 
+          if (receivedMessage == "left" || receivedMessage == "right" || 
+            receivedMessage == "up" || receivedMessage == "down") {
+            Serial.println(receivedMessage); // Send direction to Python script
+            delay(1000);
+        }
         // start with while If the message is left,right,up down, then send it to the python with Serial.println
         if (receivedMessage == "Experiment 2 Finish") {
           Serial.println("Experiment 2 Finish");
