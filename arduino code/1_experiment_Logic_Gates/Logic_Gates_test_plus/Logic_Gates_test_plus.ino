@@ -124,6 +124,8 @@ void handleGateCommand(const char* gate, int gateIndex) {
 }
 
 void performGateOperation() {
+  int tempSequence = -1;
+
   for (int i = 4; i <= 10; i++) {
     digitalWrite(i, LOW);
   }
@@ -135,25 +137,26 @@ void performGateOperation() {
     button1State = digitalRead(button1Pin);
 
     // Update the highSequence array
-    highSequence[highSequenceIndex] = button1State;
-    highSequenceIndex = (highSequenceIndex + 1) % 4;
+    sequence[SequenceIndex] = button1State;
+    SequenceIndex = (SequenceIndex + 1) % 3;
 
     // Update the sequence array based on the current highSequence
-    if (highSequence[0] == HIGH && highSequence[1] == HIGH && highSequence[2] == HIGH && highSequence[3] == HIGH) {
-      sequence[sequenceIndex] = HIGH;
-    } else if (highSequence[0] == LOW && highSequence[1] == LOW && highSequence[2] == LOW && highSequence[3] == LOW) {
-      sequence[sequenceIndex] = LOW;
+    if (sequence[0] == HIGH && sequence[1] == HIGH && sequence[2] == HIGH ) {
+      tempSequence = HIGH;
+    } else if (sequence[0] == LOW && sequence[1] == LOW && sequence[2] == LOW) {
+      tempSequence = LOW;
     } else {
-      sequence[sequenceIndex] = -1; // Indicate a mixed sequence
+      tempSequence = -1; // Indicate a mixed sequence
     }
-    sequenceIndex = (sequenceIndex + 1) % 3;
 
     // Check the gate selected and perform action accordingly:
     if (GateSelected == NotGate) {
-      if (button1State == HIGH) {
+      if (tempSequence == HIGH) {
         digitalWrite(OutputLedPin, LOW);
+        highSequence[highSequenceIndex] = LOW;
       } else {
         digitalWrite(OutputLedPin, HIGH);
+        highSequence[highSequenceIndex] = HIGH;
       }
     } else if (GateSelected == OrGate) {
       if (button1State == HIGH || button2State == HIGH) {
@@ -192,25 +195,27 @@ void performGateOperation() {
         digitalWrite(OutputLedPin, LOW);
       }
     }
+    highSequence = (highSequence + 1) % 4;
 
     // Print the highSequence array
     Serial.print("High Sequence: ");
     for (int i = 0; i < 4; i++) {
-      Serial.print(highSequence[i]);
-      Serial.print(" ");
+      if (highSequence[i] == HIGH) {
+        Serial.print("HIGH ");
+      } else if (highSequence[i] == LOW) {
+        Serial.print("LOW ");
+      } else {
+        Serial.print("MIXED ");
+      }
     }
     Serial.println();
 
     // Print the sequence array
     Serial.print("Sequence: ");
     for (int i = 0; i < 3; i++) {
-      if (sequence[i] == HIGH) {
-        Serial.print("HIGH ");
-      } else if (sequence[i] == LOW) {
-        Serial.print("LOW ");
-      } else {
-        Serial.print("MIXED ");
-      }
+      Serial.print(sequence[i]);
+      Serial.print(" ");
+      
     }
     Serial.println();
 
