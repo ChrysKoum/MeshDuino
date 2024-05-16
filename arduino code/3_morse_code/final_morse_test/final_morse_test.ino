@@ -33,42 +33,47 @@ void setup() {
 }
 
 void loop() {
-    // Rx code receive code from center Arduino
-    uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold incoming data
-    char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
+    // Check for received message
+    String receivedMessage = receiveMessage();
+
+    if (receivedMessage == "Experiment 3 Start") {
+        delay(5000); // Delay for 5 seconds
+
+        // Wait for the word to decode
+        while (true) {
+            String wordToDecode = receiveMessage();
+            if (wordToDecode != "") {
+                Serial.print("Word to decode: ");
+                Serial.println(wordToDecode); // Display the word to decode
+                break;
+            }
+        }
+
+        delay(5000); // Delay for another 5 seconds
+        sendFinishMessage("Experiment 3 Finish");
+    }
+}
+
+String receiveMessage() {
+    uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
+    char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
     memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
     memset(incoming, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-    uint8_t len = sizeof(buf); // Length of the incoming data
-    uint8_t from; // Variable to store the sender's address
+    uint8_t len = sizeof(buf);
+    uint8_t from;
 
-    // Check if data is received
     if (rf22.recvfromAck(buf, &len, &from)) {
-        buf[len] = '\0'; // Ensure null-termination for proper string handling
-        memcpy(incoming, buf, len + 1); // Copy received data into incoming buffer, ensuring it's a valid string
+        buf[len] = '\0';
+        memcpy(incoming, buf, len + 1);
 
         Serial.print("Message received from address: ");
-        Serial.println(from, DEC); // Display the sender's address
+        Serial.println(from, DEC);
         Serial.print("Message: ");
-        Serial.println(incoming); // Display the received message as a string
+        Serial.println(incoming);
 
-        if (strcmp(incoming, "Experiment 3 Start") == 0) {
-            delay(5000); // Delay for 5 seconds
-
-            // Wait for the word to decode
-            while (true) {
-                if (rf22.recvfromAck(buf, &len, &from)) {
-                    buf[len] = '\0';
-                    memcpy(incoming, buf, len + 1);
-                    Serial.print("Word to decode: ");
-                    Serial.println(incoming); // Display the word to decode
-                    break;
-                }
-            }
-
-            delay(5000); // Delay for another 5 seconds
-            sendFinishMessage("Experiment 3 Finish");
-        }
+        return String(incoming);
     }
+    return "";
 }
 
 void sendFinishMessage(const char *message) {

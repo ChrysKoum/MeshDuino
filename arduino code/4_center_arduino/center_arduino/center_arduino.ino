@@ -86,6 +86,7 @@ void loop() {
         if (Serial.available()) {
           String wordToDecode = Serial.readStringUntil('\n');
           wordToDecode.trim();
+          Serial.println("wordToDecode: " + String(wordToDecode));
           sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
           break;
         }
