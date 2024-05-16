@@ -40,7 +40,7 @@ if 1 == 2:
 # Experiment 3: Send '3' to start, send a random 5-letter word, and wait for finish
 send_command_and_wait_for_response('3', "Experiment 3 Start", arduino_serial)
 
-time.sleep(2)  # Wait for the connection to establish
+time.sleep(5)  # Wait for the connection to establish
 
 # Pick a random 5-letter word
 words = ['APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY']

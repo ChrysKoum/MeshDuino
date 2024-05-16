@@ -68,12 +68,6 @@ void setup()
     Serial.println();
     Serial.println("-------------------------------");
     Serial.println("Morse Code decoder/encoder");
-    Serial.print("Speed=");
-    Serial.print(wpm);
-    Serial.print("wpm, ");
-    Serial.print("dot=");
-    Serial.print(dotLength);
-    Serial.println("ms");
 
     // Rx,Tx code
     if (!rf22.init()) // initialize my radio
@@ -84,36 +78,15 @@ void setup()
     rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
     // 1,2,5,8,11,14,17,20 DBM
     rf22.setModemConfig(RF22::OOK_Rb40Bw335); // set the desired modulation
-    // modulation
 
     // Manually define the routes for this network
     rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
     delay(1000); // delay for 1 s
 
-    // Test the LED and tone
-    tone(tonePin, toneFreq);
-    digitalWrite(ledPin, HIGH);
-    delay(2000);
-    digitalWrite(ledPin, LOW);
-    noTone(tonePin);
-    delay(600);
-
-    // flash to demonstrate the expected key speed
-    // A
-    Serial.print("A .-  ");
-    index = 'A' - 65;
-    flashSequence(letters[index]);
-    delay(wordSpace);
-    Serial.println();
-    Serial.println("-------------------------------");
-    Serial.println("Click field in Serial Monitor,");
-    Serial.println("type text and press Enter, or");
-    Serial.println("Key in Morse Code to decode:");
-    Serial.println("-------------------------------");
-
     newLetter = false; // if false, do NOT check for end of letter gap
     newWord = false;   // if false, do NOT check for end of word gap
     keyboardText = false;
+    Serial.println("Setup complete.");
 }
 
 void loop() {

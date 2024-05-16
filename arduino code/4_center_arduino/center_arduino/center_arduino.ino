@@ -112,7 +112,7 @@ void sendMessage(const char *message, uint8_t destination) {
     Serial.println("Attempting to send finish message...");
 
     bool success = false;
-    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
+    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
         Serial.print("Attempt ");
         Serial.println(attempt + 1);
         if (rf22.sendtoWait(data_send, strlen(message), destination) == RF22_ROUTER_ERROR_NONE) {
