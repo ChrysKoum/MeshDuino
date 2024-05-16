@@ -12,7 +12,7 @@ RF22Router rf22(MY_ADDRESS);
 const int button1Pin = 2;     // the number of the pushbutton pin
 const int button2Pin = 3;     // the number of the pushbutton pin
 
-const int OutputLedPin =  13;      // the number of the Output LED pin
+const int OutputLedPin =  13 ;      // the number of the Output LED pin
 
 const int NotGate = 4;
 const int OrGate = 5;
@@ -27,6 +27,9 @@ int button1State = 0;         // variable for reading the pushbutton status
 int button2State = 0;
 int GateSelected = 4;          // not gate selected by default
 int gateIndex = 1;
+// Variables to track the HIGH LOW HIGH LOW sequence
+int sequence[4] = {0, 0, 0, 0};
+int sequenceIndex = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -80,7 +83,7 @@ void loop() {
       handleGateCommand(incoming, gateIndex);
       gateIndex++;
     }
-    if(gateIndex == 4){
+    if(gateIndex == 5){
       sendMessage("Experiment 1 Finish");
       gateIndex = 1;
     }
@@ -122,15 +125,24 @@ void performGateOperation() {
   }
   digitalWrite(GateSelected, HIGH);
 
+  while(true)
+  {
+
   // read the state of the pushbutton value:
   button1State = digitalRead(button1Pin);
   button2State = digitalRead(button2Pin);
 
-  // check the gate selected and perform action accordingly:
+  // Update the sequence array
+  sequence[sequenceIndex] = button1State;
+  sequenceIndex = (sequenceIndex + 1) % 4;
+
+  // Check the gate selected and perform action accordingly:
   if (GateSelected == NotGate) {
     if (button1State == HIGH) digitalWrite(OutputLedPin, LOW); else digitalWrite(OutputLedPin, HIGH);
   } else if (GateSelected == OrGate) {
-    if (button1State == HIGH || button2State == HIGH) digitalWrite(OutputLedPin, HIGH); else digitalWrite(OutputLedPin, LOW);
+    if (button1State == HIGH && button2State == HIGH) 
+    digitalWrite(OutputLedPin, HIGH); 
+       else digitalWrite(OutputLedPin, LOW);
   } else if (GateSelected == AndGate) {
     if (button1State == HIGH && button2State == HIGH) {
       digitalWrite(OutputLedPin, HIGH);
@@ -138,7 +150,7 @@ void performGateOperation() {
       digitalWrite(OutputLedPin, LOW);
     }
   } else if (GateSelected == NorGate) {
-    if (button1State == HIGH || button2State == HIGH) digitalWrite(OutputLedPin, LOW); else digitalWrite(OutputLedPin, HIGH);
+    if (button1State == HIGH  button2State == HIGH) digitalWrite(OutputLedPin, LOW); else digitalWrite(OutputLedPin, HIGH);
   } else if (GateSelected == NandGate) {
     if (button1State == HIGH && button2State == HIGH) digitalWrite(OutputLedPin, LOW); else digitalWrite(OutputLedPin, HIGH);
   } else if (GateSelected == XorGate) {
@@ -146,6 +158,16 @@ void performGateOperation() {
   } else if (GateSelected == XnorGate) {
     if (button1State == button2State) digitalWrite(OutputLedPin, HIGH); else digitalWrite(OutputLedPin, LOW);
   }
+    Serial.println(sequence);
+  // Check for the HIGH LOW HIGH LOW sequence
+  if (sequence[0] == HIGH && sequence[1] == LOW && sequence[2] == HIGH && sequence[3] == LOW) {
+    Serial.println("condition success");
+    break;
+
+  }
+
+  }//while
+
 }
 
 void sendMessage(const char* message) {
