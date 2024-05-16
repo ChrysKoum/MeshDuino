@@ -9,6 +9,8 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 void setup() {
+
+
   Serial.begin(9600); // to be able to view the results in the computer's monitor
 
   if (!rf22.init()) { // initialize my radio
@@ -27,6 +29,8 @@ void setup() {
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
 }
+
+
 
 void loop() {
   if (Serial.available() > 0) {
@@ -85,9 +89,11 @@ void loop() {
       }
     }
   }
-}
+}//loop end 
+
 
 void sendMessage(const char* message, uint8_t destination) {
+
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
@@ -98,9 +104,11 @@ void sendMessage(const char* message, uint8_t destination) {
     Serial.println("sendtoWait Successful");
   }
   delay(1000);
+
 }
 
 String receiveMessage() {
+  
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(buf, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
