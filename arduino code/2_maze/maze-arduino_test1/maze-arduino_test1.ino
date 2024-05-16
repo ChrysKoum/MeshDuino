@@ -66,7 +66,7 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 if(receivedMessage=="Arduino 2 get start")
-{
+{   
  //for the right 
   digitalWrite(TRIG_PIN_RIGHT, LOW);
   delayMicroseconds(2);
@@ -96,7 +96,8 @@ if(receivedMessage=="Arduino 2 get start")
 
   forceValue = analogRead(FORCE_SENSOR_PIN);
   lightValue = analogRead(PHOTO_RESISTOR_PIN);
-bool k=false;
+ bool k=false;
+ 
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
