@@ -60,6 +60,9 @@ bool k = true;
 
 void setup() {
     delay(500);
+    pinMode(ledPin, OUTPUT);
+    pinMode(tonePin, OUTPUT);
+    pinMode(buttonPin, INPUT_PULLUP);
     
     Serial.begin(9600);
     Serial.println();
