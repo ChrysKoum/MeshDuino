@@ -9,8 +9,8 @@
 RF22Router rf22(MY_ADDRESS);
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 3 ;    // the number of the pushbutton pin
-const int button2Pin = 11;     // the number of the pushbutton pin
+const int button1Pin = 2;     // the number of the pushbutton pin
+const int button2Pin = 3;     // the number of the pushbutton pin
 
 const int OutputLedPin =  13;      // the number of the Output LED pin
 
@@ -28,7 +28,11 @@ int button2State = 0;
 int GateSelected = 4;          // not gate selected by default
 int gateIndex = 1;
 // Variables to track the HIGH LOW HIGH LOW sequence
-int sequence[4] = {0, 0, 0, 0};
+int highSequence[4] = {0, 0, 0, 0};
+int highSequenceIndex = 0;
+
+// Variables to track the HIGH HIGH HIGH or LOW LOW LOW sequence
+int sequence[3] = {0, 0, 0};
 int sequenceIndex = 0;
 int cnt=0;
 
@@ -57,13 +61,8 @@ void setup() {
   rf22.setModemConfig(RF22::OOK_Rb40Bw335); // The modulation should be the same as that of the transmitter. Otherwise no communication will take place
 
   // Manually define the routes for this network
- 
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
-Serial.println("set up complete");
-  
 }
-
-
 
 void loop() {
   // Rx code receive code from center Arduino
@@ -89,7 +88,7 @@ void loop() {
       handleGateCommand(incoming, gateIndex);
       gateIndex++;
     }
-    if(gateIndex == 5){
+    if (gateIndex == 5) {
       sendMessage("Experiment 1 Finish");
       gateIndex = 1;
     }
@@ -127,6 +126,8 @@ void handleGateCommand(const char* gate, int gateIndex) {
 }
 
 void performGateOperation() {
+  int tempSequence = -1;
+
   for (int i = 4; i <= 10; i++) {
     digitalWrite(i, LOW);
   }
@@ -202,24 +203,36 @@ Serial.println(button1State);
         digitalWrite(OutputLedPin, LOW);
       }
     }
-     
-    // Print the sequence array
-    Serial.print("Sequence: ");
-    for (int i = 0; i < 4; i++) {
-      Serial.print(sequence[i]);
-      Serial.print(" ");
+    highSequence = (highSequence + 1) % 4;
 
+    // Print the highSequence array
+    Serial.print("High Sequence: ");
+    for (int i = 0; i < 4; i++) {
+      if (highSequence[i] == HIGH) {
+        Serial.print("HIGH ");
+      } else if (highSequence[i] == LOW) {
+        Serial.print("LOW ");
+      } else {
+        Serial.print("MIXED ");
+      }
     }
     Serial.println();
-    delay(2000);
+
+    // Print the sequence array
+    Serial.print("Sequence: ");
+    for (int i = 0; i < 3; i++) {
+      Serial.print(sequence[i]);
+      Serial.print(" ");
+      
+    }
+    Serial.println();
 
     // Check for the HIGH LOW HIGH LOW sequence
-    if (sequence[0] == LOW && sequence[1] ==  HIGH && sequence[2] == LOW && sequence[3] == HIGH) {
+    if (highSequence[0] == HIGH && highSequence[1] == LOW && highSequence[2] == HIGH && highSequence[3] == LOW) {
       Serial.println("Condition success");
       sendMessage("Finish");
       break;
     }
-
   } // while
 }
 

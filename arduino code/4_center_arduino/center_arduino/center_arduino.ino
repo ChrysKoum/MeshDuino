@@ -72,6 +72,8 @@ void loop() {
       while (true) {
         sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
         String receivedMessage = receiveMessage();
+
+        // start with while If the message is left,right,up down, then send it to the python with Serial.println
         if (receivedMessage == "Experiment 2 Finish") {
           Serial.println("Experiment 2 Finish");
           break;
