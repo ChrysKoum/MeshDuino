@@ -32,8 +32,7 @@ int highSequence[4] = {0, 0, 0, 0};
 int highSequenceIndex = 0;
 
 // Variables to track the HIGH HIGH HIGH or LOW LOW LOW sequence
-const int SEQUENCE_LENGTH = 10; // Increased length to store more readings
-int sequence[SEQUENCE_LENGTH] = {0};
+int sequence[3] = {0, 0, 0};
 int sequenceIndex = 0;
 
 void setup() {
@@ -62,7 +61,6 @@ void setup() {
 
   // Manually define the routes for this network
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1); // tells my radio card that if I want to send data to DESTINATION_ADDRESS_1 then I will send them directly to DESTINATION_ADDRESS_1 and not to another radio who would act as a relay
-  Serial.println("Set up complete");
 }
 
 void loop() {
@@ -137,26 +135,18 @@ void performGateOperation() {
     // read the state of the pushbutton value every 1 second:
     delay(1000);
     button1State = digitalRead(button1Pin);
-    button2State = digitalRead(button2Pin); // Read the state of button2Pin
 
-    // Update the sequence array with the current button1State
-    sequence[sequenceIndex] = button1State;
-    sequenceIndex = (sequenceIndex + 1) % SEQUENCE_LENGTH;
+    // Update the highSequence array
+    sequence[SequenceIndex] = button1State;
+    SequenceIndex = (SequenceIndex + 1) % 3;
 
-    // Check if there's any HIGH in the sequence array
-    bool foundHigh = false;
-    for (int i = 0; i < SEQUENCE_LENGTH; i++) {
-      if (sequence[i] == HIGH) {
-        foundHigh = true;
-        break;
-      }
-    }
-
-    // Set tempSequence based on the foundHigh flag
-    if (foundHigh) {
+    // Update the sequence array based on the current highSequence
+    if (sequence[0] == HIGH && sequence[1] == HIGH && sequence[2] == HIGH ) {
       tempSequence = HIGH;
-    } else {
+    } else if (sequence[0] == LOW && sequence[1] == LOW && sequence[2] == LOW) {
       tempSequence = LOW;
+    } else {
+      tempSequence = -1; // Indicate a mixed sequence
     }
 
     // Check the gate selected and perform action accordingly:
@@ -205,7 +195,7 @@ void performGateOperation() {
         digitalWrite(OutputLedPin, LOW);
       }
     }
-    highSequenceIndex = (highSequenceIndex + 1) % 4;
+    highSequence = (highSequence + 1) % 4;
 
     // Print the highSequence array
     Serial.print("High Sequence: ");
@@ -222,9 +212,10 @@ void performGateOperation() {
 
     // Print the sequence array
     Serial.print("Sequence: ");
-    for (int i = 0; i < SEQUENCE_LENGTH; i++) {
+    for (int i = 0; i < 3; i++) {
       Serial.print(sequence[i]);
       Serial.print(" ");
+      
     }
     Serial.println();
 
