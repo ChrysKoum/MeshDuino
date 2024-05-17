@@ -16,7 +16,7 @@ def send_command_and_wait_for_response(command, expected_response, arduino_seria
     return response
 
 # Set up the serial connection
-arduino_serial = serial.Serial('COM9', 9600)
+arduino_serial = serial.Serial('COM10', 9600)
 time.sleep(2)  # Wait for the connection to establish
 
 # Start timing the whole process

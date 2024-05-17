@@ -96,7 +96,19 @@ if(receivedMessage=="Arduino 2 get start")
 
   forceValue = analogRead(FORCE_SENSOR_PIN);
   lightValue = analogRead(PHOTO_RESISTOR_PIN);
-bool k=false;
+  bool k=false;
+ 
+ sendMessage("Moving Right");
+ delay(1000);
+  sendMessage("Moving Left");
+   delay(1000);
+  sendMessage("Moving Down");
+   delay(1000);
+sendMessage("Moving Up");
+ delay(1000);
+sendMessage("No move");
+ delay(1000);
+
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
