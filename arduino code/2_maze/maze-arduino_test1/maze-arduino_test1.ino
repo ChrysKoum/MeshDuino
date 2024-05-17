@@ -112,7 +112,7 @@ sendMessage("No move");
 
  bool k=false;
  
->>>>>>> f1721014250c6c656fcef0fc303784a96531d7fe
+
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
