@@ -105,14 +105,12 @@ if(receivedMessage=="Arduino 2 get start")
    delay(1000);
   sendMessage("Moving Down");
    delay(1000);
-sendMessage("Moving Up");
- delay(1000);
-sendMessage("No move");
- delay(1000);
-
- bool k=false;
+ sendMessage("Moving Up");
+  delay(1000);
+ sendMessage("No move");
+  delay(1000);
  
->>>>>>> f1721014250c6c656fcef0fc303784a96531d7fe
+/*
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
@@ -166,7 +164,7 @@ if (k==false) {
   
 }//end if from incoming
 
-
+*/
   
 }//loop
 
