@@ -118,6 +118,7 @@ if(cnt==1)
  
 
 /*
+>>>>>>> b30827517981af994562bdd905292dbda1ded12a
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
