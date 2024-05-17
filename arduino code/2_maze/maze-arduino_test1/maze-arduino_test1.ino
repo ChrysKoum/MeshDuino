@@ -66,7 +66,7 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 
-  if(receivedMessage=="Arduino 2 get start" && cnt==0)
+  if(receivedMessage=="Experiment 2 Start" && cnt==0)
                  cnt++;
       
 
