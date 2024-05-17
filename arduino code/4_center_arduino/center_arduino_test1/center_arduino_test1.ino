@@ -68,6 +68,7 @@ void loop() {
         }
       }
     } else if (command == '2') {
+      
       Serial.println("Experiment 2 Start");
       while (true) {
         sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
