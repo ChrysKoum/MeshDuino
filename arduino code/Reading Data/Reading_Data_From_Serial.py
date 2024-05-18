@@ -41,8 +41,6 @@ print("Experiment 1 finished.")
 
 
 
-
-
 # Experiment 2: Send '2' to start and wait for finish
 send_command_and_wait_for_response('2', "Experiment 2 Finish", arduino_serial)
 print("Experiment 2 finished.")
