@@ -38,26 +38,31 @@ void loop() {
     
     if (command == '1') {
       Serial.println("Experiment 1 Start");
-
+        sendMessage_logical_gates("Experiment 1 Start");
+        
       // Send gate commands and wait for responses
-      for (int i = 0; i < 4; i++) {
+       for (int i = 0; i < 4; i++) {
         // Wait for gate command from Serial (from Python script)
         while (!Serial.available()) { delay(10); }
         String gate = Serial.readStringUntil('\n');
         gate.trim();
 
         // Send the gate command to the first Arduino
-        sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
+       // sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
 
+
+         sendMessage_logical_gates(gate.c_str());
+         
         // Wait for the corresponding "Gate Completed" response
-        String expectedResponse = "Gate " + String(i+1) + " Completed";
+        //String expectedResponse = "Gate" + String(i+1) + " Completed";
         while (true) {
           String receivedMessage = receiveMessage();
-          if (receivedMessage == expectedResponse) {
+          if (receivedMessage == "Success") {
             Serial.println(receivedMessage); // Print so Python can read it
             break;
           }
         }
+
       }
 
       // Finally, wait for the "Experiment 1 Finish" message
@@ -68,6 +73,7 @@ void loop() {
           break;
         }
       }
+
     } else if (command == '2') {
 
       Serial.println("Experiment 2 Start");
@@ -123,8 +129,20 @@ void sendMessage_start_maze(const char* message) {
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
 
-  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_2) != RF22_ROUTER_ERROR_NONE) {
+  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_2) != RF22_ROUTER_ERROR_NONE) { //put destination 2
     Serial.println("sendtoWait failed");
+  } else {
+    Serial.println("sendtoWait Successful");
+  }
+}
+
+void sendMessage_logical_gates(const char* message) {
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memcpy(data_send, message, strlen(message));
+
+  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) { //put destination1 
+    Serial.println("sendtoWait failed"); 
   } else {
     Serial.println("sendtoWait Successful");
   }
