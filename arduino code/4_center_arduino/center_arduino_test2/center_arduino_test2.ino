@@ -10,6 +10,8 @@
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
+const char* gates[] = {"OrGate", "AndGate", "NorGate", "NandGate","XorGate"/*,"XnorGate"*/,"NotGate"};
+
 void setup() {
   Serial.begin(9600); // to be able to view the results in the computer's monitor
 
@@ -48,9 +50,11 @@ void loop() {
       }
 
       for (int i = 0; i <4; i++) { 
+
+        
         sendMessage_logical_gates(gates[selectedGates[i]]);
         while (true) {
-            
+                    
           if (receiveMessage() =="Success"){
              delay(1000);
              break;
@@ -65,10 +69,14 @@ void loop() {
         
         String finish_message=receiveMessage();
            delay(1000);
-
+       
+       
         if(finish_message == "finish")
-              {
+              {   
+                
                  Serial.println("finish 1");
+                 delay(1000);
+                 
                   break;
               }   
                       

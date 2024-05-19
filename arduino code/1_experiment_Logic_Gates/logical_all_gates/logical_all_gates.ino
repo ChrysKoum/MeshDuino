@@ -154,13 +154,18 @@ String receivedMessage = receiveMessage();
 
 
 
-  if(cnt2==4)
-       {  cnt2++;
-        delay(1000);
-        sendMessage("finish");
-        delay(2000);
-        break;
-       } 
+  if(cnt2==4) 
+       {   
+        Serial.println("hi");
+          delay(1000);
+          sendMessage("finish");
+          delay(2000);
+          while(true){
+
+            
+          }
+      }
+
 
 }
   
@@ -208,6 +213,7 @@ void checkConditions(bool conditions[][3], int size) {
     while(true){
       delay(1000);
       sendMessage("Success");
+      delay(1000);
        break;
     }
 
@@ -219,7 +225,7 @@ void checkConditions(bool conditions[][3], int size) {
 
 void checkNotConditions(bool conditions[][2], int size) {
   cnt = 0;
-
+  cnt2++;
     for (int i = 0; i < size; i++) {
       Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
       Serial.print("Button1: ");
@@ -247,20 +253,32 @@ void checkNotConditions(bool conditions[][2], int size) {
      while(true){
       delay(1000);
       sendMessage("Success");
+      delay(1000);
        break;
     }
   }
 }
 
 void sendMessage(const char* message) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+ uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
 
-  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
-    Serial.println("sendtoWait failed");
-  } else {
-    Serial.println("sendtoWait Successful");
+  int attemptCount = 0;
+  bool success = false;
+
+  while (!success) {
+    attemptCount++;
+    if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
+      Serial.print("Attempt ");
+      Serial.print(attemptCount);
+      Serial.println(": sendtoWait failed");
+    } else {
+      success = true;
+      Serial.print("Attempt ");
+      Serial.print(attemptCount);
+      Serial.println(": sendtoWait successful");
+    }
   }
 }
 
