@@ -49,8 +49,7 @@ void loop() {
 
         // Send the gate command to the first Arduino
        // sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
-
-
+       
          sendMessage_logical_gates(gate.c_str());
          
         // Wait for the corresponding "Gate Completed" response
@@ -63,7 +62,7 @@ void loop() {
           }
         }
 
-      }
+      }//for
 
       // Finally, wait for the "Experiment 1 Finish" message
       while (true) {
