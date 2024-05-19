@@ -103,6 +103,12 @@ void setup() {
 }
 
 void loop() {
+
+  String start_message=receiveMessage();
+
+ if(start_message=="Experiment 1 Start");
+ {
+
   String receivedMessage = receiveMessage();
 
   // Reset all gate LEDs to LOW
@@ -132,6 +138,10 @@ void loop() {
     digitalWrite(NotGate, HIGH);
     checkNotConditions(notConditions, 2);
   }
+
+ }
+
+ 
 }
 
 void checkConditions(bool conditions[][3], int size) {
@@ -164,11 +174,15 @@ void checkConditions(bool conditions[][3], int size) {
     }
 
     if (cnt == size) {
-      sendMessage("finish");
+
+      sendMessage( "finish");
+      delay(2000);
         break;
     }
   }
-}
+}//if(Experiment 1 Start)
+
+}//loop
 
 void checkNotConditions(bool conditions[][2], int size) {
   cnt = 0;
@@ -197,6 +211,7 @@ void checkNotConditions(bool conditions[][2], int size) {
 
     if (cnt == size) {
       sendMessage("finish");
+      delay(2000);//neccessary
         break;
     }
   }
@@ -234,4 +249,5 @@ String receiveMessage() {
     return String(incoming);
   }
   return "";
+
 }
