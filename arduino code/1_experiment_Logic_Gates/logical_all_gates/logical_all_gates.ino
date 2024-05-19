@@ -65,9 +65,9 @@ bool xorConditions[4][3] = {
 };
 
 bool xnorConditions[4][3] = {
-    {LOW, LOW, HIGH}, 
-    {LOW, HIGH, LOW}, 
     {HIGH, LOW, LOW}, 
+    {LOW, HIGH, LOW}, 
+    {LOW, LOW, HIGH}, 
     {HIGH, HIGH, HIGH}
 };
 
@@ -75,6 +75,8 @@ bool notConditions[2][2] = {
     {LOW, HIGH}, 
     {HIGH, LOW}
 };
+
+int cnt2=0;
 
 void setup() {
   pinMode(OutputLedPin, OUTPUT);
@@ -98,7 +100,7 @@ void setup() {
   rf22.setModemConfig(RF22::OOK_Rb40Bw335);
 
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
-
+delay(1000);
   Serial.println("setup complete");
 }
 
@@ -109,44 +111,70 @@ void loop() {
  if(start_message=="Experiment 1 Start");
  {
 
-  String receivedMessage = receiveMessage();
+while(true){
+String receivedMessage = receiveMessage();
+
 
   // Reset all gate LEDs to LOW
-  for (int i = 4; i <= 10; i++) {
+  for (int i =4; i <=10; i++) {
     digitalWrite(i, LOW);
   }
 
   if (receivedMessage == "OrGate") {
+    cnt2++;
     digitalWrite(OrGate, HIGH);
     checkConditions(orConditions, 4);
   } else if (receivedMessage == "AndGate") {
+    
     digitalWrite(AndGate, HIGH);
     checkConditions(andConditions, 4);
   } else if (receivedMessage == "NorGate") {
+    
     digitalWrite(NorGate, HIGH);
     checkConditions(norConditions, 4);
   } else if (receivedMessage == "NandGate") {
+   
     digitalWrite(NandGate, HIGH);
     checkConditions(nandConditions, 4);
   } else if (receivedMessage == "XorGate") {
+    
     digitalWrite(XorGate, HIGH);
     checkConditions(xorConditions, 4);
   } else if (receivedMessage == "XnorGate") {
+    
     digitalWrite(XnorGate, HIGH);
     checkConditions(xnorConditions, 4);
+
   } else if (receivedMessage == "NotGate") {
+    
     digitalWrite(NotGate, HIGH);
     checkNotConditions(notConditions, 2);
   }
 
+
+
+
+  if(cnt2==4)
+       {  cnt2++;
+        delay(1000);
+        sendMessage("finish");
+        delay(2000);
+        break;
+       } 
+
+}
+  
  }
 
+
+
  
-}
+}//loop
 
 void checkConditions(bool conditions[][3], int size) {
   cnt = 0;
-  while (true) {
+  cnt2++;
+
     for (int i = 0; i < size; i++) {
       Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
       Serial.print("Button1: ");
@@ -157,6 +185,7 @@ void checkConditions(bool conditions[][3], int size) {
       Serial.println(conditions[i][2]);
 
       while (i == cnt) {
+
         digitalWrite(OutputLedPin, LOW);
         button1State = digitalRead(button1Pin);
         button2State = digitalRead(button2Pin);
@@ -170,23 +199,27 @@ void checkConditions(bool conditions[][3], int size) {
           cnt++;
           break;
         }
+
       }
     }
 
     if (cnt == size) {
 
-      sendMessage( "finish");
-      delay(2000);
-        break;
+    while(true){
+      delay(1000);
+      sendMessage("Success");
+       break;
     }
-  }
-}//if(Experiment 1 Start)
 
-}//loop
+
+}
+
+}
+
 
 void checkNotConditions(bool conditions[][2], int size) {
   cnt = 0;
-  while (true) {
+
     for (int i = 0; i < size; i++) {
       Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
       Serial.print("Button1: ");
@@ -195,14 +228,14 @@ void checkNotConditions(bool conditions[][2], int size) {
       Serial.println(conditions[i][1]);
 
       while (i == cnt) {
-      digitalWrite(OutputLedPin, HIGH);
+        digitalWrite(OutputLedPin, HIGH);
         button1State = digitalRead(button1Pin);
 
         if (button1State == conditions[i][0]) {
           digitalWrite(OutputLedPin, conditions[i][1]);
           delay(1000);
           Serial.println("Success");
-
+           
           cnt++;
           break;
         }
@@ -210,9 +243,11 @@ void checkNotConditions(bool conditions[][2], int size) {
     }
 
     if (cnt == size) {
-      sendMessage("finish");
-      delay(2000);//neccessary
-        break;
+
+     while(true){
+      delay(1000);
+      sendMessage("Success");
+       break;
     }
   }
 }
