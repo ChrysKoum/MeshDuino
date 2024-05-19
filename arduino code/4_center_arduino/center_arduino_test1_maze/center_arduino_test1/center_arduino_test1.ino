@@ -35,6 +35,7 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     char command = Serial.read();
+    
     if (command == '1') {
       Serial.println("Experiment 1 Start");
 
@@ -116,6 +117,7 @@ void loop() {
     }
   }
 }
+
 void sendMessage_start_maze(const char* message) {
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);

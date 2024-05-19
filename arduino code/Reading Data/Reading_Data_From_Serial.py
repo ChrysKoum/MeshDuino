@@ -28,9 +28,8 @@ gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'Xnor
 selected_gates = random.sample(gates, 4)
 
 
-selected_gates = ['NotGate', 'OrGate', 'AndGate'] # , 'NorGate'  # For testing purposes  
+selected_gates = ['NotGate', 'OrGate', 'AndGate'  , 'NorGate']  # For testing purposes  
 
-# if(1==2):
    # Experiment 1: Send '1' to start, then send each selected gate command sequentially
 send_command_and_wait_for_response('1', "Experiment 1 Start", arduino_serial)
 for i, gate in enumerate(selected_gates, 1):
