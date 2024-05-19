@@ -145,12 +145,37 @@ void sendMessage_logical_gates(const char* message) {
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
 
+  int attemptCount = 0;
+  bool success = false;
+
+  while (!success) {
+    attemptCount++;
+    if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
+      Serial.print("Attempt ");
+      Serial.print(attemptCount);
+      Serial.println(": sendtoWait failed");
+    } else {
+      success = true;
+      Serial.print("Attempt ");
+      Serial.print(attemptCount);
+      Serial.println(": sendtoWait successful");
+    }
+  }
+}
+
+/**
+void sendMessage_logical_gates(const char* message) {
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memcpy(data_send, message, strlen(message));
+
   if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) { //put destination1 
     Serial.println("sendtoWait failed"); 
   } else {
     Serial.println("sendtoWait Successful");
   }
 }
+*/
 
 void sendMessage(const char *message, uint8_t destination) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
