@@ -110,11 +110,7 @@ if(receivedMessage=="Arduino 2 get start")
  sendMessage("No move");
   delay(1000);
  
-<<<<<<< HEAD
-
-=======
 /*
->>>>>>> b30827517981af994562bdd905292dbda1ded12a
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
@@ -172,6 +168,7 @@ if (k==false) {
   
 }//loop
 
+}
 void sendMessage(const char* message) {
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
@@ -182,6 +179,7 @@ void sendMessage(const char* message) {
   } else {
     Serial.println("sendtoWait Successful");
   }
+  
 }
 
 String receiveMessage() {
