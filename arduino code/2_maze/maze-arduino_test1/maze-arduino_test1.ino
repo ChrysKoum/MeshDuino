@@ -116,9 +116,7 @@ if(cnt==1)
  sendMessage("No move");
   delay(1000);
  
-
 /*
-
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
@@ -175,6 +173,7 @@ if (k==false) {
 
 }//loop
 
+}
 void sendMessage(const char* message) {
   uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
@@ -185,6 +184,7 @@ void sendMessage(const char* message) {
   } else {
     Serial.println("sendtoWait Successful");
   }
+  
 }
 
 String receiveMessage() {
