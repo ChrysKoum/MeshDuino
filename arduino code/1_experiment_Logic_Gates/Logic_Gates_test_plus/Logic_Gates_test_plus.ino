@@ -64,6 +64,7 @@ void setup() {
 }
 
 void loop() {
+  
   // Rx code receive code from center Arduino
   uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];  // Buffer to hold incoming data
   char incoming[RF22_ROUTER_MAX_MESSAGE_LEN]; // Buffer to hold converted incoming data as a string
@@ -82,7 +83,7 @@ void loop() {
     Serial.print("Message: ");
     Serial.println(incoming); // Display the received message as a string
 
-    if (strcmp(incoming, "Arduino 1 get start") != 0) {
+    if (strcmp(incoming, "Experiment 1 Start") != 0) {
       // It's a gate command, handle it
       handleGateCommand(incoming, gateIndex);
       gateIndex++;

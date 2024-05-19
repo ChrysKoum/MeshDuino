@@ -35,6 +35,7 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     char command = Serial.read();
+    
     if (command == '1') {
       Serial.println("Experiment 1 Start");
 
@@ -68,16 +69,21 @@ void loop() {
         }
       }
     } else if (command == '2') {
-      
+
       Serial.println("Experiment 2 Start");
+        // sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
+            
+            sendMessage_start_maze("Arduino 2 get start");
+            
       while (true) {
-        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
-        String receivedMessage = receiveMessage();
+      
+         String receivedMessage = receiveMessage();
 
           if (receivedMessage == "left" || receivedMessage == "right" || 
-            receivedMessage == "up" || receivedMessage == "down") {
+            receivedMessage == "up" || receivedMessage == "down" || receivedMessage == "no move") {
             Serial.println(receivedMessage); // Send direction to Python script
             delay(1000);
+            
         }
         // start with while If the message is left,right,up down, then send it to the python with Serial.println
         if (receivedMessage == "Experiment 2 Finish") {
@@ -109,6 +115,18 @@ void loop() {
         }
       }
     }
+  }
+}
+
+void sendMessage_start_maze(const char* message) {
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+  memcpy(data_send, message, strlen(message));
+
+  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_2) != RF22_ROUTER_ERROR_NONE) {
+    Serial.println("sendtoWait failed");
+  } else {
+    Serial.println("sendtoWait Successful");
   }
 }
 

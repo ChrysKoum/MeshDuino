@@ -19,7 +19,7 @@ const int ECHO_PIN_LEFT=10;
 
 
 float duration_right,duration_left,distance_right,distance_left;
-
+int cnt=0;
  int forceValue=0;
 int lightValue=0;
 
@@ -65,8 +65,14 @@ void loop() {
 
  String receivedMessage = receiveMessage();
 
-if(receivedMessage=="Arduino 2 get start")
-{   
+
+  if(receivedMessage=="Experiment 2 Start" && cnt==0)
+                 cnt++;
+      
+
+if(cnt==1)
+{
+
  //for the right 
   digitalWrite(TRIG_PIN_RIGHT, LOW);
   delayMicroseconds(2);
@@ -114,7 +120,7 @@ if(receivedMessage=="Arduino 2 get start")
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
-  sendMessage("Moving Right");
+  sendMessage("right");
   // Add your code to move right here
    k=true;
   delay(1000);
@@ -124,7 +130,7 @@ if(receivedMessage=="Arduino 2 get start")
 if(distance_left < 100) {
   // Move left
   Serial.println("Moving Left");
-  sendMessage("Moving Left");
+  sendMessage("left");
   // Add your code to move left here
   k=true;
   delay(1000);
@@ -134,7 +140,7 @@ if(distance_left < 100) {
 if (forceValue > 300) {
   // Move down
   Serial.println("Moving Down");
-  sendMessage("Moving Down");
+  sendMessage("down");
   Serial.println(forceValue);
   // Add your code to move down here
   k=true;
@@ -145,7 +151,7 @@ if (forceValue > 300) {
 if (lightValue > 500) {
   // Move up
   Serial.println("Moving Up");
-  sendMessage("Moving Up");
+  sendMessage("up");
   Serial.println(lightValue);
   // Add your code to move up here
   k=true;
@@ -157,15 +163,14 @@ if (lightValue > 500) {
 if (k==false) {
   // If none of the conditions are met
   Serial.println("Nothing");
-  sendMessage("No move");
+  sendMessage("no move");
   // Add your code for no movement here
   delay(1000);
 }
-  
+  */
+
 }//end if from incoming
 
-*/
-  
 }//loop
 
 }
