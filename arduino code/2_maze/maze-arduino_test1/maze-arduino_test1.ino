@@ -10,8 +10,8 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 
-const int FORCE_SENSOR_PIN=A1;
-const int PHOTO_RESISTOR_PIN=A0;
+const int PHOTO_RESISTOR2_PIN=A1;
+const int PHOTO_RESISTOR1_PIN=A0;
 const int TRIG_PIN_RIGHT=13;
 const int ECHO_PIN_RIGHT=12;
 const int TRIG_PIN_LEFT=11;
@@ -45,7 +45,7 @@ void setup() {
 if (!rf22.init())
     Serial.println("RF22 init failed");
   // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-  if (!rf22.setFrequency(434.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
+  if (!rf22.setFrequency(442.0)) // The frequency should be the same as that of the transmitter. Otherwise no communication will take place
     Serial.println("setFrequency Fail");
   rf22.setTxPower(RF22_TXPOW_20DBM);
   //1,2,5,8,11,14,17,20 DBM
@@ -100,11 +100,12 @@ if(cnt==1)
   //Serial.println(distance);
  // delay(100);
 
-  forceValue = analogRead(FORCE_SENSOR_PIN);
-  lightValue = analogRead(PHOTO_RESISTOR_PIN);
+  lightValue1 = analogRead(PHOTO_RESISTOR1_PIN);
+  lightValue2 = analogRead(PHOTO_RESISTOR2_PIN);
 
   bool k=false;
- 
+
+ /*
  sendMessage("Moving Right");
  delay(1000);
   sendMessage("Moving Left");
@@ -116,11 +117,15 @@ if(cnt==1)
  sendMessage("No move");
   delay(1000);
  
-/*
+ 
+ */
+ 
+ 
+
  if ( distance_right < 100) {
   // Move right
   Serial.println("Moving Right");
-  sendMessage("right");
+  sendMessage("Right");
   // Add your code to move right here
    k=true;
   delay(1000);
@@ -130,29 +135,29 @@ if(cnt==1)
 if(distance_left < 100) {
   // Move left
   Serial.println("Moving Left");
-  sendMessage("left");
+  sendMessage("Left");
   // Add your code to move left here
   k=true;
   delay(1000);
  
 }
 
-if (forceValue > 300) {
+if (lightValue2 > 500) {
   // Move down
   Serial.println("Moving Down");
-  sendMessage("down");
-  Serial.println(forceValue);
+  sendMessage("Down");
+  Serial.println(lightValue2);
   // Add your code to move down here
   k=true;
   delay(1000);
   
 }
 
-if (lightValue > 500) {
+if (lightValue1 > 500) {
   // Move up
   Serial.println("Moving Up");
-  sendMessage("up");
-  Serial.println(lightValue);
+  sendMessage("Up");
+  Serial.println(lightValue1);
   // Add your code to move up here
   k=true;
   
@@ -163,19 +168,19 @@ if (lightValue > 500) {
 if (k==false) {
   // If none of the conditions are met
   Serial.println("Nothing");
-  sendMessage("no move");
+  sendMessage("No move");
   // Add your code for no movement here
   delay(1000);
 }
-  */
+  
 
 }//end if from incoming
 
 }//loop
 
-}
+
 void sendMessage(const char* message) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+ /*uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
 
@@ -185,7 +190,36 @@ void sendMessage(const char* message) {
     Serial.println("sendtoWait Successful");
   }
   
+ 
+ */ 
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+    memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memcpy(data_send, message, strlen(message));
+    
+    Serial.println("Attempting to send finish message...");
+
+    bool success = false;
+    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
+        Serial.print("Attempt ");
+        Serial.println(attempt + 1);
+        if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
+            Serial.println("sendtoWait Successful");
+            success = true;
+            break;
+        } else {
+            Serial.println("sendtoWait failed");
+        }
+        delay(1000); // Wait 1 second before retrying
+    }
+
+    if (!success) {
+        Serial.println("Failed to send finish message after 3 attempts.");
+    }
+
+
 }
+
+
 
 String receiveMessage() {
     uint8_t buf[RF22_ROUTER_MAX_MESSAGE_LEN];
