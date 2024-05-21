@@ -99,8 +99,3 @@ def show_help():
         wraplength=580
     ).pack(pady=10, padx=20)
 
-# Create the main window and add the Home section
-root = Tk()
-root.geometry("1000x600")
-Home(root)
-root.mainloop()

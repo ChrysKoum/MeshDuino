@@ -4,7 +4,7 @@ from pathlib import Path
 # Explicit imports to satisfy Flake8
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, messagebox
 import threading
-from gui.Primary_Window.sub_gui.engeenering_GUI.gui import Engeenering
+from gui.Primary_Window.sub_gui.engeenering_GUI.gui import EngeeneringApp
 
 
 
@@ -65,7 +65,7 @@ def Challenge(parent):
         image=challange_coding_button_image,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: threading.Thread(target=Engeenering, args=(parent,), daemon=True).start(),
+        command=lambda: threading.Thread(target=EngeeneringApp, args=(parent,), daemon=True).start(),
         relief="flat",
         activebackground="#FFFFFF",
         activeforeground="#FFFFFF"
