@@ -9,13 +9,13 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 12; // the number of the pushbutton pin
+const int button1Pin = 13; // the number of the pushbutton pin
 const int button2Pin = 3; // the number of the pushbutton pin
 const int OutputLedPin = 7; // the number of the Output LED pin
 const int NotGate = 4;
 const int OrGate = 5;
 const int AndGate = 6;
-const int NorGate = 13;
+const int NorGate = 12;
 const int NandGate = 8;
 const int XorGate = 9;
 const int XnorGate = 10;
@@ -167,7 +167,6 @@ String receivedMessage = receiveMessage();
           }
       }
 
-
 }
   
  }
@@ -195,8 +194,9 @@ void checkConditions(bool conditions[][3], int size) {
         digitalWrite(OutputLedPin, LOW);
         button1State = digitalRead(button1Pin);
         button2State = digitalRead(button2Pin);
-        //Serial.println(button1State);
-
+        Serial.println(button1State);
+        Serial.println(button2State);
+        delay(2000);
         if (button1State == conditions[i][0] && button2State == conditions[i][1]) {
           digitalWrite(OutputLedPin, conditions[i][2]);
           delay(1000);
@@ -215,7 +215,9 @@ void checkConditions(bool conditions[][3], int size) {
 
     while(true){
       delay(1000);
-      sendMessage("Gate " + String(cnt2) + " is Completed");
+      String comb_sent = "Gate " + String(cnt2) + " is Completed"; 
+      sendMessage(comb_sent.c_str());
+
       delay(1000);
        break;
     }
@@ -257,7 +259,8 @@ void checkNotConditions(bool conditions[][2], int size) {
 
      while(true){
       delay(1000);
-      sendMessage("Gate " + String(cnt2) + " is Completed");
+      String comb_sent = "Gate " + String(cnt2) + " is Completed"; 
+      sendMessage(comb_sent.c_str());
       delay(1000);
        break;
     }
