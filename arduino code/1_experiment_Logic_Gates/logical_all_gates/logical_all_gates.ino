@@ -92,7 +92,7 @@ void setup() {
     Serial.println("RF22 init failed");
   }
 
-  if (!rf22.setFrequency(434.0)) {
+  if (!rf22.setFrequency(442.0)) {
     Serial.println("setFrequency Fail");
   }
 
@@ -212,8 +212,8 @@ void checkConditions(bool conditions[][3], int size) {
 
     while(true){
       delay(1000);
-      sendMessage("Success");
-      delay(1000);
+      sendMessage("Success Gate");
+      delay(2000);
        break;
     }
 
@@ -252,14 +252,15 @@ void checkNotConditions(bool conditions[][2], int size) {
 
      while(true){
       delay(1000);
-      sendMessage("Success");
+      sendMessage("Success Gate");
       delay(1000);
        break;
     }
   }
 }
 
-void sendMessage(const char* message) {
+/*void sendMessage(const char* message) {
+
  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
@@ -280,6 +281,33 @@ void sendMessage(const char* message) {
       Serial.println(": sendtoWait successful");
     }
   }
+}
+
+*/
+void sendMessage(const char *message) {
+    uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+    memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
+    memcpy(data_send, message, strlen(message));
+    
+    Serial.println("Attempting to send finish message...");
+
+    bool success = false;
+    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
+        Serial.print("Attempt ");
+        Serial.println(attempt + 1);
+        if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
+            Serial.println("sendtoWait Successful");
+            success = true;
+            break;
+        } else {
+            Serial.println("sendtoWait failed");
+        }
+        delay(1000); // Wait 1 second before retrying
+    }
+
+    if (!success) {
+        Serial.println("Failed to send finish message after 3 attempts.");
+    }
 }
 
 String receiveMessage() {
