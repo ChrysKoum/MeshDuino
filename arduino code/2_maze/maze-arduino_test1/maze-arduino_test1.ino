@@ -12,16 +12,16 @@ RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_A
 
 const int PHOTO_RESISTOR2_PIN=A1;
 const int PHOTO_RESISTOR1_PIN=A0;
-const int TRIG_PIN_RIGHT=13;
-const int ECHO_PIN_RIGHT=12;
-const int TRIG_PIN_LEFT=11;
-const int ECHO_PIN_LEFT=10;
+const int TRIG_PIN_RIGHT=7;
+const int ECHO_PIN_RIGHT=6;
+const int TRIG_PIN_LEFT=10;
+const int ECHO_PIN_LEFT=9;
 
 
 float duration_right,duration_left,distance_right,distance_left;
 int cnt=0;
- int forceValue=0;
-int lightValue=0;
+ int lightValue2=0;
+int lightValue1=0;
 
 void sendMessage(const char* message);
 String receiveMessage();
@@ -34,9 +34,9 @@ void setup() {
   pinMode(TRIG_PIN_LEFT, OUTPUT);
   pinMode(ECHO_PIN_LEFT, INPUT);
   
-  pinMode(FORCE_SENSOR_PIN, INPUT); // Configure force sensor pin as input
+  pinMode(PHOTO_RESISTOR1_PIN, INPUT); // Configure force sensor pin as input
   
-  pinMode(PHOTO_RESISTOR_PIN, INPUT); // Configure photoresistor pin as input
+  pinMode(PHOTO_RESISTOR1_PIN, INPUT); // Configure photoresistor pin as input
   
     Serial.begin(9600);
  
@@ -67,10 +67,9 @@ void loop() {
 
 
   if(receivedMessage=="Experiment 2 Start" && cnt==0)
-                    cnt++;
-      
+                    cnt++;     
 
-if(cnt==1)
+while(cnt==1)
 {
 
  //for the right 
@@ -119,59 +118,39 @@ if(cnt==1)
  
  
  */
- 
- 
-
- if ( distance_right < 100) {
-  // Move right
-  Serial.println("Moving Right");
-  sendMessage("Right");
-  // Add your code to move right here
-   k=true;
-  delay(1000);
-
-}
-
-if(distance_left < 100) {
-  // Move left
-  Serial.println("Moving Left");
-  sendMessage("Left");
-  // Add your code to move left here
-  k=true;
-  delay(1000);
- 
-}
-
-if (lightValue2 > 500) {
-  // Move down
-  Serial.println("Moving Down");
-  sendMessage("Down");
-  Serial.println(lightValue2);
-  // Add your code to move down here
-  k=true;
-  delay(1000);
-  
-}
-
-if (lightValue1 > 500) {
-  // Move up
-  Serial.println("Moving Up");
-  sendMessage("Up");
-  Serial.println(lightValue1);
-  // Add your code to move up here
-  k=true;
-  
-  delay(1000);
-  
-}
-
-if (k==false) {
-  // If none of the conditions are met
-  Serial.println("Nothing");
-  sendMessage("No move");
-  // Add your code for no movement here
-  delay(1000);
-}
+// Serial.println("TIMI");
+ //Serial.print(lightValue2);
+if (distance_right < 10) {
+    // Move right
+    Serial.println("Moving Right");
+    Serial.print(distance_right);
+    sendMessage("Right");
+    delay(1500);
+  } else if (distance_left < 10) {
+    // Move left
+    Serial.println("Moving Left");
+    Serial.print(distance_left);
+    sendMessage("Left");
+    delay(1500);
+  } else if (lightValue2 < 400) {
+    // Move down
+    Serial.println("Moving Down");
+    sendMessage("Down");
+    Serial.println(lightValue2);
+    delay(1500);
+  } else if (lightValue1 < 400) {
+    // Move up
+    Serial.println("Moving Up");
+    sendMessage("Up");
+    Serial.println(lightValue1);
+    delay(1500);
+  } else {
+    // If none of the conditions are met
+    Serial.println("Nothing");
+    sendMessage("No move");
+    // Add your code for no movement here
+    delay(1500);
+  }
   
 
 }//end if from incoming
