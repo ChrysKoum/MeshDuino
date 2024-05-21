@@ -154,17 +154,17 @@ String receivedMessage = receiveMessage();
 
 
 
-  if(cnt2==4) 
-       {   
-        Serial.println("hi");
-          delay(1000);
-          sendMessage("finish");
-          delay(2000);
-          while(true){
+  // if(cnt2==4) 
+  //      {   
+  //       Serial.println("hi");
+  //         delay(1000);
+  //         sendMessage("finish");
+  //         delay(2000);
+  //         while(true){
 
             
-          }
-      }
+  //         }
+  //     }
 
 
 }
@@ -200,6 +200,7 @@ void checkConditions(bool conditions[][3], int size) {
           digitalWrite(OutputLedPin, conditions[i][2]);
           delay(1000);
           Serial.println("Success");
+          sendMessage("Combinational Gate " + String(i) + " is Completed");
 
           cnt++;
           break;
@@ -212,7 +213,7 @@ void checkConditions(bool conditions[][3], int size) {
 
     while(true){
       delay(1000);
-      sendMessage("Success");
+      sendMessage("Experiment 1 Finish");
       delay(1000);
        break;
     }
@@ -241,6 +242,7 @@ void checkNotConditions(bool conditions[][2], int size) {
           digitalWrite(OutputLedPin, conditions[i][1]);
           delay(1000);
           Serial.println("Success");
+          sendMessage("Combinational Gate " + String(i) + " is Completed");
            
           cnt++;
           break;
@@ -252,7 +254,7 @@ void checkNotConditions(bool conditions[][2], int size) {
 
      while(true){
       delay(1000);
-      sendMessage("Success");
+      sendMessage("Experiment 1 Finish");
       delay(1000);
        break;
     }
