@@ -10,9 +10,10 @@ from threading import Thread, Event
 from pathlib import Path
 import sys
 from serial.tools import list_ports
-from utils.character import Character
-from utils.graph import Graph
-
+# from utils.character import Character
+# from utils.graph import Graph
+from backend.maze_handler.character import Character
+from backend.maze_handler.graph import Graph
 
 # Global variables
 logic_gate_app = None
@@ -34,9 +35,9 @@ def get_serial_ports():
     ports = list_ports.comports()
     return [port.device for port in ports]
 
-def show_serial_port_selection():
+def EngeeneringApp(parent):
     ports = get_serial_ports()
-    port_selection_window = Toplevel(root)
+    port_selection_window = Toplevel(parent)
     port_selection_window.title("Select Serial Port")
     port_selection_window.geometry("300x200")
     port_selection_window.configure(bg="#FFFFFF")
@@ -56,7 +57,7 @@ def show_serial_port_selection():
             serial_port.set("Test Port")
         if serial_port.get():
             port_selection_window.destroy()
-            logic_gate_app = LogicGateApp(root, switch_to_maze_app, serial_port.get())
+            logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get())
             logic_gate_app.mainloop()
         else:
             messagebox.showerror("Selection Error", "Please select a serial port.")
@@ -143,6 +144,7 @@ class LogicGateApp(tk.Toplevel):
         response = ""
         while True:
             if self.arduino_serial.inWaiting() > 0:
+                time.sleep(1)  # Wait for the data to be available
                 response = self.arduino_serial.readline().decode('utf-8').strip()
                 print(f"Received response: {response}")
                 self.log_to_terminal(f"Received response: {response}")
@@ -167,7 +169,7 @@ class LogicGateApp(tk.Toplevel):
     def send_experiment_command(self, gates):
         def send_and_wait(gate):
             command = gate
-            expected_response = f"{gate} Completed"
+            expected_response = f"Success Gate"
             self.send_command_and_wait_for_response(command, expected_response)
             self.log_to_terminal(f"Sent: {command}")
             self.log_to_terminal(f"Waiting for: {expected_response}")
@@ -473,15 +475,18 @@ class MorseApp(tk.Toplevel):
         self.terminal_text.config(state=tk.DISABLED)
         self.terminal_text.see(tk.END)
 
-def switch_to_maze_app(serial_port):
+def switch_to_maze_app(parent, serial_port):
     logic_gate_app.destroy()
-    maze_app = MazeApp(root, serial_port)
+    global maze_app
+    maze_app = MazeApp(parent, serial_port)
     maze_app.mainloop()
 
-def switch_to_morse_app(serial_port):
+def switch_to_morse_app(parent, serial_port):
     maze_app.destroy()
-    morse_app = MorseApp(root, serial_port, finish_callback)
+    global morse_app
+    morse_app = MorseApp(parent, serial_port, finish_callback)
     morse_app.mainloop()
+
 
 def finish_callback():
     global start_time
@@ -496,5 +501,5 @@ def finish_callback():
 if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
-    show_serial_port_selection()
+    EngeeneringApp(root)
     root.mainloop()
