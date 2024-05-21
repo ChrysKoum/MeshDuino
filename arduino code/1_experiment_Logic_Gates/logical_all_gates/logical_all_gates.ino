@@ -165,21 +165,13 @@ void checkConditions(bool conditions[][3], int size) {
     Serial.print(conditions[i][1]);
     Serial.print(" LED: ");
     Serial.println(conditions[i][2]);
+    Serial.print(" cnt: ");
+    Serial.println(cnt);
 
     while (i == cnt) {
       digitalWrite(OutputLedPin, LOW);
       button1State = digitalRead(button1Pin);
       button2State = digitalRead(button2Pin);
-
-      // Debugging prints
-      Serial.print("Read Button1 State: ");
-      Serial.println(button1State);
-      Serial.print("Expected Button1 State: ");
-      Serial.println(conditions[i][0]);
-      Serial.print("Read Button2 State: ");
-      Serial.println(button2State);
-      Serial.print("Expected Button2 State: ");
-      Serial.println(conditions[i][1]);
 
       // Add a small delay for debouncing
       delay(50);
@@ -192,7 +184,6 @@ void checkConditions(bool conditions[][3], int size) {
         sendMessage(comb_sent.c_str());
 
         cnt++;
-        break;
       }
     }
   }
@@ -218,6 +209,8 @@ void checkNotConditions(bool conditions[][2], int size) {
     Serial.print(conditions[i][0]);
     Serial.print(" LED: ");
     Serial.println(conditions[i][1]);
+    Serial.print(" cnt: ");
+    Serial.println(cnt);
 
     while (i == cnt) {
       digitalWrite(OutputLedPin, HIGH);
@@ -229,9 +222,7 @@ void checkNotConditions(bool conditions[][2], int size) {
         Serial.println("Success");
         String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
         sendMessage(comb_sent.c_str());
-
         cnt++;
-        break;
       }
     }
   }
