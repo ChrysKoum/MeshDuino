@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import Canvas, Text, simpledialog
+from tkinter import ttk, simpledialog, PhotoImage, Canvas, Button, Toplevel, Label, Text, messagebox
 from PIL import Image, ImageTk
+from tkinter.constants import DISABLED, LEFT
 import random
 import serial
 import pygame
@@ -8,15 +9,17 @@ import time
 from threading import Thread, Event
 from pathlib import Path
 import sys
-# from utils.character import Character
-# from utils.graph import Graph
-from backend.maze_handler.character import Character
-from backend.maze_handler.graph import Graph
+from serial.tools import list_ports
+from utils.character import Character
+from utils.graph import Graph
 
-# Define the relative_to_assets function
-def relative_to_assets(path: str) -> Path:
-    return Path(__file__).parent / "assets" / Path(path)
 
+# Global variables
+logic_gate_app = None
+maze_app = None
+start_time = None
+
+# Function to make an Arduino connection
 def make_arduino_connection(port, baudrate):
     try:
         arduino_serial = serial.Serial(port, baudrate)
@@ -26,25 +29,60 @@ def make_arduino_connection(port, baudrate):
         print("Port not open. Stopping the application.")
         sys.exit()
 
-def send_command_and_wait_for_response(command, expected_response, arduino_serial):
-    print(f"Sending command: {command}")
-    arduino_serial.write(command.encode())
+# Function to get the available serial ports
+def get_serial_ports():
+    ports = list_ports.comports()
+    return [port.device for port in ports]
 
-    response = ""
-    while True:
-        if arduino_serial.inWaiting() > 0:
-            response = arduino_serial.readline().decode('utf-8').strip()
-            print(f"Received response: {response}")
-            if response == expected_response:
-                break
-    return response
+def show_serial_port_selection():
+    ports = get_serial_ports()
+    port_selection_window = Toplevel(root)
+    port_selection_window.title("Select Serial Port")
+    port_selection_window.geometry("300x200")
+    port_selection_window.configure(bg="#FFFFFF")
+
+    Label(port_selection_window, text="Select Serial Port", font=("Montserrat Bold", 14), bg="#FFFFFF").pack(pady=10)
+
+    serial_port = tk.StringVar()
+    port_combobox = ttk.Combobox(port_selection_window, textvariable=serial_port, values=ports)
+    port_combobox.pack(pady=10)
+    
+    simulation_mode = tk.BooleanVar()
+    simulation_checkbutton = tk.Checkbutton(port_selection_window, text="Simulation Mode", variable=simulation_mode, onvalue=True, offvalue=False, bg="#FFFFFF")
+    simulation_checkbutton.pack(pady=10)
+
+    def on_port_selected():
+        if simulation_mode.get():
+            serial_port.set("Test Port")
+        if serial_port.get():
+            port_selection_window.destroy()
+            logic_gate_app = LogicGateApp(root, switch_to_maze_app, serial_port.get())
+            logic_gate_app.mainloop()
+        else:
+            messagebox.showerror("Selection Error", "Please select a serial port.")
+
+    Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold')).pack(pady=10)
+
+# Define the relative_to_assets function
+def relative_to_assets(path: str) -> Path:
+    return Path(__file__).parent / "assets" / Path(path)
+
+# Function to simulate serial data from the Arduino
+def simulate_serial_data(arduino_serial):
+    time.sleep(1)
+    responses = ["Experiment 1 Start", "Gate 1 Completed", "Gate 2 Completed", "Gate 3 Completed", "Gate 4 Completed", "Experiment 1 Finish"]
+    for response in responses:
+        arduino_serial.write(response.encode())
+        time.sleep(1)
 
 class LogicGateApp(tk.Toplevel):
-    def __init__(self, master, switch_to_maze_app):
+    def __init__(self, master, switch_to_maze_app, serial_port):
         super().__init__(master)
         self.title("Networked Digital Logic Gates")
         self.geometry("800x600")
         self.switch_to_maze_app = switch_to_maze_app
+        self.serial_port = serial_port
+        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -52,35 +90,35 @@ class LogicGateApp(tk.Toplevel):
         self.load_images()
         self.create_widgets()
 
-        self.arduino_serial = None
-        try:
-            self.arduino_serial = serial.Serial('COM9', 9600)
-        except serial.SerialException:
-            print("Port not open. Stopping the application.")
-            self.destroy()
-
         self.pause_event = Event()
         self.pause_event.set()
 
     def load_images(self):
-        self.schematic_image = Image.open(relative_to_assets("logic_gate_schematic.png"))
-        self.schematic_photo = ImageTk.PhotoImage(self.schematic_image)
-        
-    def create_widgets(self):
-        self.canvas.create_image(50, 50, image=self.schematic_photo, anchor=tk.NW)
+        self.schematic_image = PhotoImage(file=relative_to_assets("logic_gate_schematic.png"))
 
-        self.output_text = tk.Text(self, height=10, width=30, state=tk.DISABLED)
+    def create_widgets(self):
+        self.canvas.create_image(50, 50, image=self.schematic_image, anchor=tk.NW)
+
+        self.output_text = Text(self, height=10, width=30, state=DISABLED)
         self.canvas.create_window(600, 170, window=self.output_text)
 
-        self.terminal_text = tk.Text(self, height=10, width=80, state=tk.DISABLED)
+        self.terminal_text = Text(self, height=10, width=80, state=DISABLED)
         self.canvas.create_window(400, 400, window=self.terminal_text)
 
-        self.read_serial_button = tk.Button(self, text="Start Experiment 1", command=self.start_experiment_1,
-                                            bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
-                                            activebackground='#45a049', bd=0, padx=10, pady=5)
+        self.read_serial_button = Button(self, text="Start Experiment 1", command=self.start_experiment_1,
+                                         bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
+                                         activebackground='#45a049', bd=0, padx=10, pady=5)
         self.read_serial_button.place(x=320, y=550)
         self.read_serial_button.bind("<Enter>", self.on_enter)
         self.read_serial_button.bind("<Leave>", self.on_leave)
+
+        # Help button
+        self.help_button = Button(self, text="Help", command=self.show_help,
+                                  bg='#2196F3', fg='white', font=('Helvetica', 12, 'bold'),
+                                  activebackground='#1E88E5', bd=0, padx=10, pady=5)
+        self.help_button.place(x=720, y=20)
+        self.help_button.bind("<Enter>", self.on_enter_help)
+        self.help_button.bind("<Leave>", self.on_leave_help)
 
     def on_enter(self, e):
         e.widget['background'] = '#45a049'
@@ -88,32 +126,62 @@ class LogicGateApp(tk.Toplevel):
     def on_leave(self, e):
         e.widget['background'] = '#4CAF50'
 
+    def on_enter_help(self, e):
+        e.widget['background'] = '#1E88E5'
+
+    def on_leave_help(self, e):
+        e.widget['background'] = '#2196F3'
+
+    def display_success_message(self):
+        messagebox.showinfo("Success", "Experiment 1 Finished")
+
+    def send_command_and_wait_for_response(self, command, expected_response):
+        print(f"Sending command: {command}")
+        self.log_to_terminal(f"Sending command: {command}")
+        self.arduino_serial.write(command.encode())
+
+        response = ""
+        while True:
+            if self.arduino_serial.inWaiting() > 0:
+                response = self.arduino_serial.readline().decode('utf-8').strip()
+                print(f"Received response: {response}")
+                self.log_to_terminal(f"Received response: {response}")
+                if response == expected_response:
+                    break
+        return response
+
     def start_experiment_1(self):
         self.output_text.config(state=tk.NORMAL)
         self.output_text.delete('1.0', tk.END)
 
         gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
         selected_gates = random.sample(gates, 4)
-        input_states = ['LOW', 'HIGH', 'LOW', 'HIGH']
 
-        experiment_text = "\n".join([f"{gate}: {state}" for gate, state in zip(selected_gates, input_states)])
+        experiment_text = "\n".join([f"{gate}" for gate in selected_gates])
         self.output_text.insert(tk.END, experiment_text)
         self.output_text.config(state=tk.DISABLED)
 
         self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
-        self.send_experiment_command(selected_gates, input_states)
-        self.monitor_serial_for_success()
+        self.send_experiment_command(selected_gates)
 
-    def send_experiment_command(self, gates, states):
-        command = "Start Experiment 1\n" + "\n".join([f"{gate}:{state}" for gate, state in zip(gates, states)])
-        self.arduino_serial.write(command.encode())
-        self.log_to_terminal(command)
+    def send_experiment_command(self, gates):
+        def send_and_wait(gate):
+            command = gate
+            expected_response = f"{gate} Completed"
+            self.send_command_and_wait_for_response(command, expected_response)
+            self.log_to_terminal(f"Sent: {command}")
+            self.log_to_terminal(f"Waiting for: {expected_response}")
+
+        for gate in gates:
+            self.after(100, send_and_wait, gate)  # Delay to avoid blocking
+
+        self.monitor_serial_for_success()
 
     def monitor_serial_for_success(self):
         def read_serial():
             while True:
-                if self.arduino_serial.in_waiting > 0:
-                    my_data = self.arduino_serial.readline().decode().strip()
+                if self.arduino_serial.inWaiting() > 0:
+                    my_data = self.arduino_serial.readline().decode('utf-8').strip()
                     self.log_to_terminal(my_data)
                     if "Experiment 1 Finish" in my_data:
                         self.display_success_message()
@@ -130,7 +198,7 @@ class LogicGateApp(tk.Toplevel):
         self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
 
     def start_experiment_2(self):
-        self.switch_to_maze_app()
+        self.switch_to_maze_app(self.serial_port)
 
     def log_to_terminal(self, message):
         self.terminal_text.config(state=tk.NORMAL)
@@ -138,13 +206,42 @@ class LogicGateApp(tk.Toplevel):
         self.terminal_text.config(state=tk.DISABLED)
         self.terminal_text.see(tk.END)
 
+    def show_help(self):
+        help_window = Toplevel(self)
+        help_window.title("Help")
+        help_window.geometry("700x500")
+        help_window.configure(bg="#FFFFFF")
+
+        Label(help_window, text="Help and Support", font=("Montserrat Bold", 24), fg="#171435", bg="#FFFFFF").pack(pady=10)
+
+        help_text = """
+        Welcome to Meshduino!
+
+        Meshduino is an Arduino network integrated with Python, featuring a GUI.
+
+        Sections:
+        - Home: Introduction to Meshduino and its features.
+        - Challenges: View and participate in available challenges.
+        - Leaderboard: See the best times and rankings of teams.
+        - About Us: Learn more about our team.
+
+        For further assistance, please contact us at:
+        support@meshduino.com
+
+        Future Products and Tutorials:
+        - Detailed guides for Users/Parents/Teachers.
+        - Comprehensive tutorials for Students to master challenges.
+        """
+
+        Label(help_window, text=help_text, font=("Montserrat", 14), fg="#171435", bg="#FFFFFF", justify=LEFT, wraplength=580).pack(pady=10, padx=20)
 
 class MazeApp(tk.Toplevel):
-    def __init__(self, master, switch_to_morse_app):
+    def __init__(self, master, serial_port):
         super().__init__(master)
-        self.title("Maze App")
+        self.title("Maze Challenge")
         self.geometry("800x600")
-        self.switch_to_morse_app = switch_to_morse_app
+        self.serial_port = serial_port
+        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
 
         self.grid_size = 20
         self.side_length = 20
@@ -160,6 +257,11 @@ class MazeApp(tk.Toplevel):
 
         self.pause_event = Event()
         self.pause_event.set()
+
+    def switch_to_morse_app(self, serial_port):
+        self.destroy()
+        morse_app = MorseApp(self.master, serial_port, self.finish_challenge)
+        morse_app.mainloop()
 
     def on_enter(self, e):
         e.widget['background'] = '#45a049'
@@ -283,36 +385,28 @@ class MazeApp(tk.Toplevel):
                         player.move_character(next_point)
                     if player.reached_goal():
                         carryOn = False
-                        self.switch_to_morse_app()
+                        self.switch_to_morse_app(self.serial_port)
                     start_timer = pygame.time.get_ticks()
                 pygame.display.update()
             pygame.quit()
         
         runGame(self.grid_size, self.side_length)
 
-
 class MorseApp(tk.Toplevel):
-    def __init__(self, master, finish_callback):
+    def __init__(self, master, serial_port, finish_callback):
         super().__init__(master)
         self.title("Morse App")
         self.geometry("800x600")
+        self.serial_port = serial_port
+        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
         self.finish_callback = finish_callback
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.create_widgets()
+        global start_time
         self.start_time = time.time()
-
-        self.arduino_serial = None
-        try:
-            self.arduino_serial = serial.Serial('COM11', 9600)
-        except serial.SerialException:
-            print("Port not open. Stopping the application.")
-            self.destroy()
-
-        self.pause_event = Event()
-        self.pause_event.set()
 
     def create_widgets(self):
         self.output_text = Text(self, height=10, width=30, state=tk.DISABLED)
@@ -357,8 +451,8 @@ class MorseApp(tk.Toplevel):
     def monitor_serial_for_success(self):
         def read_serial():
             while True:
-                if self.arduino_serial.in_waiting > 0:
-                    my_data = self.arduino_serial.readline().decode().strip()
+                if self.arduino_serial.inWaiting() > 0:
+                    my_data = self.arduino_serial.readline().decode('utf-8').strip()
                     self.log_to_terminal(my_data)
                     if "Experiment 3 Success" in my_data:
                         self.display_success_message()
@@ -379,39 +473,28 @@ class MorseApp(tk.Toplevel):
         self.terminal_text.config(state=tk.DISABLED)
         self.terminal_text.see(tk.END)
 
+def switch_to_maze_app(serial_port):
+    logic_gate_app.destroy()
+    maze_app = MazeApp(root, serial_port)
+    maze_app.mainloop()
 
-def Engeenering(parent):
-    def switch_to_maze_app():
-        logic_gate_app.destroy()
-        global maze_app
-        maze_app = MazeApp(parent, switch_to_morse_app(serial_port))
-        maze_app.mainloop()
+def switch_to_morse_app(serial_port):
+    maze_app.destroy()
+    morse_app = MorseApp(root, serial_port, finish_callback)
+    morse_app.mainloop()
 
-    def switch_to_morse_app(serial_port):
-        maze_app.destroy()
-        global morse_app
-        morse_app = MorseApp(parent, finish_callback(serial_port))
-        morse_app.mainloop()
-
-    def finish_callback(serial_port):
-        morse_app.destroy()
-        end_time = time.time()
-        duration = end_time - start_time
-        print(f"Total time taken for the whole process: {duration:.2f} seconds")
-        name = simpledialog.askstring("Input", "Enter your team name:")
-        if name:
-            with open("results.txt", "a") as file:
-                file.write(f"Team: {name}, Time: {duration} seconds\n")
-
-    start_time = time.time()
-    global logic_gate_app
-    serial_port = make_arduino_connection('COM9', 9600)
-    logic_gate_app = LogicGateApp(parent, switch_to_maze_app(serial_port))
-    logic_gate_app.mainloop()
-
+def finish_callback():
+    global start_time
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"Total time taken for the whole process: {duration:.2f} seconds")
+    name = simpledialog.askstring("Input", "Enter your team name:")
+    if name:
+        with open("results.txt", "a") as file:
+            file.write(f"Team: {name}, Time: {duration} seconds\n")
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
-    Engeenering(root)
+    show_serial_port_selection()
     root.mainloop()
