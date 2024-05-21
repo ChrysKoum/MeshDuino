@@ -76,7 +76,7 @@ bool notConditions[2][2] = {
     {HIGH, LOW}
 };
 
-int cnt2=0;
+int cnt2 = 0;
 
 void setup() {
   pinMode(OutputLedPin, OUTPUT);
@@ -100,175 +100,155 @@ void setup() {
   rf22.setModemConfig(RF22::OOK_Rb40Bw335);
 
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
-delay(1000);
+  delay(1000);
   Serial.println("setup complete");
 }
 
 void loop() {
+  String start_message = receiveMessage();
 
-  String start_message=receiveMessage();
+  if (start_message == "Experiment 1 Start") {
+    while (true) {
+      String receivedMessage = receiveMessage();
 
- if(start_message=="Experiment 1 Start");
- {
-
-while(true){
-String receivedMessage = receiveMessage();
-
-
-  // Reset all gate LEDs to LOW
-  for (int i =4; i <=10; i++) {
-    digitalWrite(i, LOW);
-  }
-
-  if (receivedMessage == "OrGate") {
-    digitalWrite(OrGate, HIGH);
-    checkConditions(orConditions, 4);
-  } else if (receivedMessage == "AndGate") {
-    
-    digitalWrite(AndGate, HIGH);
-    checkConditions(andConditions, 4);
-  } else if (receivedMessage == "NorGate") {
-    
-    digitalWrite(NorGate, HIGH);
-    checkConditions(norConditions, 4);
-  } else if (receivedMessage == "NandGate") {
-   
-    digitalWrite(NandGate, HIGH);
-    checkConditions(nandConditions, 4);
-  } else if (receivedMessage == "XorGate") {
-    
-    digitalWrite(XorGate, HIGH);
-    checkConditions(xorConditions, 4);
-  } else if (receivedMessage == "XnorGate") {
-    
-    digitalWrite(XnorGate, HIGH);
-    checkConditions(xnorConditions, 4);
-
-  } else if (receivedMessage == "NotGate") {
-    
-    digitalWrite(NotGate, HIGH);
-    checkNotConditions(notConditions, 2);
-  }
-
-
-
-
-  if(cnt2==4) 
-       {   
-        Serial.println("Finished");
-          delay(1000);
-          sendMessage("Experiment 1 Finish");
-          delay(2000);
-          while(true){
-            Serial.println("ended");
-            delay(100000);
-
-            
-          }
+      // Reset all gate LEDs to LOW
+      for (int i = 4; i <= 10; i++) {
+        digitalWrite(i, LOW);
       }
 
+      if (receivedMessage == "OrGate") {
+        digitalWrite(OrGate, HIGH);
+        checkConditions(orConditions, 4);
+      } else if (receivedMessage == "AndGate") {
+        digitalWrite(AndGate, HIGH);
+        checkConditions(andConditions, 4);
+      } else if (receivedMessage == "NorGate") {
+        digitalWrite(NorGate, HIGH);
+        checkConditions(norConditions, 4);
+      } else if (receivedMessage == "NandGate") {
+        digitalWrite(NandGate, HIGH);
+        checkConditions(nandConditions, 4);
+      } else if (receivedMessage == "XorGate") {
+        digitalWrite(XorGate, HIGH);
+        checkConditions(xorConditions, 4);
+      } else if (receivedMessage == "XnorGate") {
+        digitalWrite(XnorGate, HIGH);
+        checkConditions(xnorConditions, 4);
+      } else if (receivedMessage == "NotGate") {
+        digitalWrite(NotGate, HIGH);
+        checkNotConditions(notConditions, 2);
+      }
+
+      if (cnt2 == 4) {
+        Serial.println("Finished");
+        delay(1000);
+        sendMessage("Experiment 1 Finish");
+        delay(2000);
+        while (true) {
+          Serial.println("ended");
+          delay(100000);
+        }
+      }
+    }
+  }
 }
-  
- }
-
-
-
- 
-}//loop
 
 void checkConditions(bool conditions[][3], int size) {
   cnt = 0;
   cnt2++;
 
-    for (int i = 0; i < size; i++) {
-      Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
-      Serial.print("Button1: ");
-      Serial.print(conditions[i][0]);
-      Serial.print(" Button2: ");
-      Serial.print(conditions[i][1]);
-      Serial.print(" LED: ");
-      Serial.println(conditions[i][2]);
+  for (int i = 0; i < size; i++) {
+    Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
+    Serial.print("Button1: ");
+    Serial.print(conditions[i][0]);
+    Serial.print(" Button2: ");
+    Serial.print(conditions[i][1]);
+    Serial.print(" LED: ");
+    Serial.println(conditions[i][2]);
 
-      while (i == cnt) {
+    while (i == cnt) {
+      digitalWrite(OutputLedPin, LOW);
+      button1State = digitalRead(button1Pin);
+      button2State = digitalRead(button2Pin);
 
-        digitalWrite(OutputLedPin, LOW);
-        button1State = digitalRead(button1Pin);
-        button2State = digitalRead(button2Pin);
-        Serial.println(button1State);
-        Serial.println(button2State);
-        delay(2000);
-        if (button1State == conditions[i][0] && button2State == conditions[i][1]) {
-          digitalWrite(OutputLedPin, conditions[i][2]);
-          delay(1000);
-          Serial.println("Success");
-          String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
-          sendMessage(comb_sent.c_str());
+      // Debugging prints
+      Serial.print("Read Button1 State: ");
+      Serial.println(button1State);
+      Serial.print("Expected Button1 State: ");
+      Serial.println(conditions[i][0]);
+      Serial.print("Read Button2 State: ");
+      Serial.println(button2State);
+      Serial.print("Expected Button2 State: ");
+      Serial.println(conditions[i][1]);
 
-          cnt++;
-          break;
-        }
+      // Add a small delay for debouncing
+      delay(50);
 
+      if (button1State == conditions[i][0] && button2State == conditions[i][1]) {
+        digitalWrite(OutputLedPin, conditions[i][2]);
+        delay(1000);
+        Serial.println("Success");
+        String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
+        sendMessage(comb_sent.c_str());
+
+        cnt++;
+        break;
       }
     }
+  }
 
-    if (cnt == size) {
-
-    while(true){
+  if (cnt == size) {
+    while (true) {
       delay(1000);
-      String comb_sent = "Gate " + String(cnt2) + " is Completed"; 
+      String comb_sent = "Gate " + String(cnt2) + " is Completed";
       sendMessage(comb_sent.c_str());
-
       delay(1000);
-       break;
+      break;
     }
-
-
+  }
 }
-
-}
-
 
 void checkNotConditions(bool conditions[][2], int size) {
   cnt = 0;
   cnt2++;
-    for (int i = 0; i < size; i++) {
-      Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
-      Serial.print("Button1: ");
-      Serial.print(conditions[i][0]);
-      Serial.print(" LED: ");
-      Serial.println(conditions[i][1]);
 
-      while (i == cnt) {
-        digitalWrite(OutputLedPin, HIGH);
-        button1State = digitalRead(button1Pin);
+  for (int i = 0; i < size; i++) {
+    Serial.println("YOU HAVE TO DO THE FOLLOW COMBINATION:");
+    Serial.print("Button1: ");
+    Serial.print(conditions[i][0]);
+    Serial.print(" LED: ");
+    Serial.println(conditions[i][1]);
 
-        if (button1State == conditions[i][0]) {
-          digitalWrite(OutputLedPin, conditions[i][1]);
-          delay(1000);
-          Serial.println("Success");
-          String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
-          sendMessage(comb_sent.c_str());
-           
-          cnt++;
-          break;
-        }
+    while (i == cnt) {
+      digitalWrite(OutputLedPin, HIGH);
+      button1State = digitalRead(button1Pin);
+
+      if (button1State == conditions[i][0]) {
+        digitalWrite(OutputLedPin, conditions[i][1]);
+        delay(1000);
+        Serial.println("Success");
+        String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
+        sendMessage(comb_sent.c_str());
+
+        cnt++;
+        break;
       }
     }
+  }
 
-    if (cnt == size) {
-
-     while(true){
+  if (cnt == size) {
+    while (true) {
       delay(1000);
       String comb_sent = "Gate " + String(cnt2) + " is Completed"; 
       sendMessage(comb_sent.c_str());
       delay(1000);
-       break;
+      break;
     }
   }
 }
 
 void sendMessage(const char* message) {
- uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
+  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
   memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
   memcpy(data_send, message, strlen(message));
 
@@ -310,5 +290,4 @@ String receiveMessage() {
     return String(incoming);
   }
   return "";
-
 }
