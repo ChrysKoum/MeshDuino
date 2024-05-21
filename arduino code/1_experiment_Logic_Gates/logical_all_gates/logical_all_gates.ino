@@ -200,7 +200,8 @@ void checkConditions(bool conditions[][3], int size) {
           digitalWrite(OutputLedPin, conditions[i][2]);
           delay(1000);
           Serial.println("Success");
-          sendMessage("Combinational Gate " + String(i) + " is Completed");
+          String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
+          sendMessage(comb_sent.c_str());
 
           cnt++;
           break;
@@ -242,7 +243,8 @@ void checkNotConditions(bool conditions[][2], int size) {
           digitalWrite(OutputLedPin, conditions[i][1]);
           delay(1000);
           Serial.println("Success");
-          sendMessage("Combinational Gate " + String(i) + " is Completed");
+          String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
+          sendMessage(comb_sent.c_str());
            
           cnt++;
           break;
