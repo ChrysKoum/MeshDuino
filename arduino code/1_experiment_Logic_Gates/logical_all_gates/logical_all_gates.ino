@@ -92,7 +92,7 @@ void setup() {
     Serial.println("RF22 init failed");
   }
 
-  if (!rf22.setFrequency(434.0)) {
+  if (!rf22.setFrequency(442.0)) {
     Serial.println("setFrequency Fail");
   }
 
