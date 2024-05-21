@@ -357,6 +357,7 @@ if (Serial.available() > 0)
     }
   }  
   
+  
 // keyed letter has been identified and printed
 
 // when gap is >= wordSpace, insert space between words
