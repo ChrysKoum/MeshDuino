@@ -20,7 +20,7 @@ void setup() {
   }
   
   // Set the desired frequency (common for all communications)
-  if (!rf22.setFrequency(434.0)) {
+  if (!rf22.setFrequency(442.0)) {
     Serial.println("setFrequency Fail");
   }
   
@@ -54,8 +54,12 @@ void loop() {
         
         sendMessage_logical_gates(gates[selectedGates[i]]);
         while (true) {
-                    
-          if (receiveMessage() =="Success"){
+          String receiveGateMessage=receiveMessage();
+          if (receiveGateMessage == "Success") {
+            Serial.println(receiveGateMessage); // Send direction to Python script
+            delay(1000);
+          }
+          if (receiveGateMessage == "Success Gate"){
              delay(1000);
              break;
            
@@ -68,13 +72,12 @@ void loop() {
       {
         
         String finish_message=receiveMessage();
-           delay(1000);
        
        
-        if(finish_message == "finish")
+        if(finish_message == "Experiment 1 Finish")
               {   
                 
-                 Serial.println("finish 1");
+                 Serial.println("Experiment 1 Finish");
                  delay(1000);
                  
                   break;

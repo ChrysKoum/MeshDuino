@@ -9,6 +9,7 @@ def send_command_and_wait_for_response(command, expected_response, arduino_seria
     response = ""
     while True:
         if arduino_serial.inWaiting() > 0:
+            time.sleep(1)  # Wait for the data to be available
             response = arduino_serial.readline().decode('utf-8').strip()
             print(f"Received response: {response}")
             if response == expected_response:
