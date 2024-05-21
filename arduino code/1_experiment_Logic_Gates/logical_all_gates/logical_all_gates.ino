@@ -9,13 +9,13 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 13; // the number of the pushbutton pin
+const int button1Pin = 12; // the number of the pushbutton pin
 const int button2Pin = 3; // the number of the pushbutton pin
 const int OutputLedPin = 7; // the number of the Output LED pin
 const int NotGate = 4;
 const int OrGate = 5;
 const int AndGate = 6;
-const int NorGate = 12;
+const int NorGate = 13;
 const int NandGate = 8;
 const int XorGate = 9;
 const int XnorGate = 10;
@@ -92,8 +92,7 @@ void setup() {
     Serial.println("RF22 init failed");
   }
 
-  if (!rf22.setFrequency(442.0)) {
-  if (!rf22.setFrequency(442.0)) {
+  if (!rf22.setFrequency(432.0)) {
     Serial.println("setFrequency Fail");
   }
 
@@ -140,7 +139,7 @@ void loop() {
         checkNotConditions(notConditions, 2);
       }
 
-      if (cnt2 == 4) {
+      if (cnt2 == 1) {
         Serial.println("Finished");
         delay(1000);
         sendMessage("Experiment 1 Finish");
@@ -178,26 +177,31 @@ void checkConditions(bool conditions[][3], int size) {
       delay(50);
 
       if (button1State == conditions[i][0] && button2State == conditions[i][1]) {
+        cnt++;
         digitalWrite(OutputLedPin, conditions[i][2]);
         delay(1000);
         Serial.println("Success");
-        String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
-        sendMessage(comb_sent.c_str());
+        sendMessage("Success");
+         Serial.println("After succees");
 
-        cnt++;
+         break;
+        
       }
     }
-  }
 
-  if (cnt == size) {
+  }
+Serial.println("yes");
+
     while (true) {
       delay(1000);
+      
       sendMessage("Success Gate");
-      delay(2000);
-       break;
+      delay(1000);
+      break;
     }
+
   }
-}
+
 
 void checkNotConditions(bool conditions[][2], int size) {
   cnt = 0;
@@ -237,54 +241,33 @@ void checkNotConditions(bool conditions[][2], int size) {
   }
 }
 
-/*void sendMessage(const char* message) {
-
- uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memcpy(data_send, message, strlen(message));
-
-  int attemptCount = 0;
-  bool success = false;
-
-  while (!success) {
-    attemptCount++;
-    if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
-      Serial.print("Attempt ");
-      Serial.print(attemptCount);
-      Serial.println(": sendtoWait failed");
-    } else {
-      success = true;
-      Serial.print("Attempt ");
-      Serial.print(attemptCount);
-      Serial.println(": sendtoWait successful");
-    }
-  }
-}
-
-*/
 void sendMessage(const char *message) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
     memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
     memcpy(data_send, message, strlen(message));
-    
-    Serial.println("Attempting to send finish message...");
+
+    Serial.println("Attempting to send message...");
 
     bool success = false;
-    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
+    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 5 times
         Serial.print("Attempt ");
-        Serial.println(attempt + 1);
-        if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
+        Serial.print(attempt + 1);
+        Serial.print(": Sending message to destination ");
+        Serial.println(DESTINATION_ADDRESS_1);
+
+        if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
             break;
         } else {
             Serial.println("sendtoWait failed");
         }
-        delay(1000); // Wait 1 second before retrying
+        delay(2000); // Wait 2 seconds before retrying
+            Serial.println("retring");
     }
 
     if (!success) {
-        Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Failed to send message after 5 attempts.");
     }
 }
 
