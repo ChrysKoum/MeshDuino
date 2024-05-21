@@ -54,11 +54,12 @@ void loop() {
         
         sendMessage_logical_gates(gates[selectedGates[i]]);
         while (true) {
-          if (receivedMessage == "Combinational Gate " + String(i) + " is Completed") {
-            Serial.println(receivedMessage); // Send direction to Python script
+          String receiveGateMessage=receiveMessage();
+          if (receiveGateMessage == "Combinational Gate " + String(i) + " is Completed") {
+            Serial.println(receiveGateMessage); // Send direction to Python script
             delay(1000);
           }
-          if (receiveMessage() == "Gate " + String(i) + " is Completed"){
+          if (receiveGateMessage == "Gate " + String(i) + " is Completed"){
              delay(1000);
              break;
            

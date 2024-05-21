@@ -121,7 +121,6 @@ String receivedMessage = receiveMessage();
   }
 
   if (receivedMessage == "OrGate") {
-    cnt2++;
     digitalWrite(OrGate, HIGH);
     checkConditions(orConditions, 4);
   } else if (receivedMessage == "AndGate") {
@@ -154,17 +153,19 @@ String receivedMessage = receiveMessage();
 
 
 
-  // if(cnt2==4) 
-  //      {   
-  //       Serial.println("hi");
-  //         delay(1000);
-  //         sendMessage("finish");
-  //         delay(2000);
-  //         while(true){
+  if(cnt2==4) 
+       {   
+        Serial.println("Finished");
+          delay(1000);
+          sendMessage("Experiment 1 Finish");
+          delay(2000);
+          while(true){
+            Serial.println("ended");
+            delay(100000);
 
             
-  //         }
-  //     }
+          }
+      }
 
 
 }
@@ -214,7 +215,7 @@ void checkConditions(bool conditions[][3], int size) {
 
     while(true){
       delay(1000);
-      sendMessage("Experiment 1 Finish");
+      sendMessage("Gate " + String(cnt2) + " is Completed");
       delay(1000);
        break;
     }
@@ -256,7 +257,7 @@ void checkNotConditions(bool conditions[][2], int size) {
 
      while(true){
       delay(1000);
-      sendMessage("Experiment 1 Finish");
+      sendMessage("Gate " + String(cnt2) + " is Completed");
       delay(1000);
        break;
     }
