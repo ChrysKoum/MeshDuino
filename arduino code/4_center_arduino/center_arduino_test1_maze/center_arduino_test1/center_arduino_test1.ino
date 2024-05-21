@@ -78,14 +78,14 @@ void loop() {
       Serial.println("Experiment 2 Start");
         // sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
             
-            sendMessage_start_maze("Arduino 2 get start");
+            sendMessage("Arduino 2 get start",DESTINATION_ADDRESS_2);
             
       while (true) {
       
          String receivedMessage = receiveMessage();
 
-          if (receivedMessage == "left" || receivedMessage == "right" || 
-            receivedMessage == "up" || receivedMessage == "down" || receivedMessage == "no move") {
+          if (receivedMessage == "Left" || receivedMessage == "Right" || 
+            receivedMessage == "Up" || receivedMessage == "Down" || receivedMessage == "No move") {
             Serial.println(receivedMessage); // Send direction to Python script
             delay(1000);
             

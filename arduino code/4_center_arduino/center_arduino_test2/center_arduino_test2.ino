@@ -41,8 +41,9 @@ void loop() {
     if (command == '1') {
 
 
-       sendMessage_logical_gates("Experiment 1 Start");
+       //sendMessage_logical_gates#("Experiment 1 Start");
 
+         sendMessage("Experiment 1 Start",DESTINATION_ADDRESS_1);
       // Select 4 random gates
       int selectedGates[4];
       for (int i = 0; i <4 ; i++) {
@@ -52,7 +53,10 @@ void loop() {
       for (int i = 0; i <4; i++) { 
 
         
-        sendMessage_logical_gates(gates[selectedGates[i]]);
+       // sendMessage_logical_gates(gates[selectedGates[i]]);
+       
+        sendMessage(gates[selectedGates[i]],DESTINATION_ADDRESS_1);
+
         while (true) {
           String receiveGateMessage=receiveMessage();
           if (receiveGateMessage == "Success") {
@@ -92,16 +96,18 @@ void loop() {
     } else if (command == '2') {
 
       Serial.println("Experiment 2 Start");
-        // sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
+        
+        
+        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
             
-            sendMessage_start_maze("Arduino 2 get start");
+         //   sendMessage_start_maze("Arduino 2 get start");
             
       while (true) {
       
          String receivedMessage = receiveMessage();
 
-          if (receivedMessage == "left" || receivedMessage == "right" || 
-            receivedMessage == "up" || receivedMessage == "down" || receivedMessage == "no move") {
+          if (receivedMessage == "Left" || receivedMessage == "Right" || 
+            receivedMessage == "Up" || receivedMessage == "Down" || receivedMessage == "No move") {
             Serial.println(receivedMessage); // Send direction to Python script
             delay(1000);
             
