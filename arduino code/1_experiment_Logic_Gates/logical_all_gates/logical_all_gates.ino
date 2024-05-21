@@ -234,8 +234,7 @@ void checkNotConditions(bool conditions[][2], int size) {
   if (cnt == size) {
     while (true) {
       delay(1000);
-      String comb_sent = "Gate " + String(cnt2) + " is Completed"; 
-      sendMessage(comb_sent.c_str());
+      sendMessage("Success Gate");
       delay(1000);
       break;
     }
