@@ -21,14 +21,18 @@ maze_app = None
 start_time = None
 
 # Function to make an Arduino connection
-def make_arduino_connection(port, baudrate):
+def make_arduino_connection(port, baudrate, simulation_mode=False):
+    if simulation_mode:
+        print("Simulation mode activated. No actual serial connection will be made.")
+        return None  # Return None to indicate simulation mode
     try:
         arduino_serial = serial.Serial(port, baudrate)
         time.sleep(2)  # Wait for the connection to establish
         return arduino_serial
     except serial.SerialException:
-        print("Port not open. Stopping the application.")
+        print("Port not open. Testing.")
         sys.exit()
+
 
 # Function to get the available serial ports
 def get_serial_ports():
@@ -54,16 +58,47 @@ def EngeeneringApp(parent):
 
     def on_port_selected():
         if simulation_mode.get():
-            serial_port.set("Test Port")
+            serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
         if serial_port.get():
             port_selection_window.destroy()
-            logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get())
+            # logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
+            logic_gate_app = MazeApp(parent, serial_port.get())
             logic_gate_app.mainloop()
         else:
             messagebox.showerror("Selection Error", "Please select a serial port.")
 
     Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold')).pack(pady=10)
 
+def select_serial_port(parent):
+    ports = get_serial_ports()
+    port_selection_window = Toplevel(parent)
+    port_selection_window.title("Select Serial Port")
+    port_selection_window.geometry("300x200")
+    port_selection_window.configure(bg="#FFFFFF")
+
+    Label(port_selection_window, text="Select Serial Port", font=("Montserrat Bold", 14), bg="#FFFFFF").pack(pady=10)
+
+    serial_port = tk.StringVar()
+    port_combobox = ttk.Combobox(port_selection_window, textvariable=serial_port, values=ports)
+    port_combobox.pack(pady=10)
+    
+    simulation_mode = tk.BooleanVar()
+    simulation_checkbutton = tk.Checkbutton(port_selection_window, text="Simulation Mode", variable=simulation_mode, onvalue=True, offvalue=False, bg="#FFFFFF")
+    simulation_checkbutton.pack(pady=10)
+
+    def on_port_selected():
+        if simulation_mode.get():
+            serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
+        if serial_port.get():
+            port_selection_window.destroy()
+            parent.selected_serial_port = serial_port.get()
+            parent.simulation_mode = simulation_mode.get()
+        else:
+            messagebox.showerror("Selection Error", "Please select a serial port.")
+
+    Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold')).pack(pady=10)
+    
+    parent.wait_window(port_selection_window)
 # Define the relative_to_assets function
 def relative_to_assets(path: str) -> Path:
     return Path(__file__).parent / "assets" / Path(path)
@@ -77,13 +112,14 @@ def simulate_serial_data(arduino_serial):
         time.sleep(1)
 
 class LogicGateApp(tk.Toplevel):
-    def __init__(self, master, switch_to_maze_app, serial_port):
+    def __init__(self, master, switch_to_maze_app, serial_port, simulation_mode=False):
         super().__init__(master)
         self.title("Networked Digital Logic Gates")
         self.geometry("800x600")
         self.switch_to_maze_app = switch_to_maze_app
         self.serial_port = serial_port
-        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
+        self.simulation_mode = simulation_mode
+        self.arduino_serial = make_arduino_connection(self.serial_port, 9600, simulation_mode)
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -139,17 +175,29 @@ class LogicGateApp(tk.Toplevel):
     def send_command_and_wait_for_response(self, command, expected_response):
         print(f"Sending command: {command}")
         self.log_to_terminal(f"Sending command: {command}")
-        self.arduino_serial.write(command.encode())
-
-        response = ""
-        while True:
-            if self.arduino_serial.inWaiting() > 0:
-                time.sleep(1)  # Wait for the data to be available
-                response = self.arduino_serial.readline().decode('utf-8').strip()
-                print(f"Received response: {response}")
-                self.log_to_terminal(f"Received response: {response}")
-                if response == expected_response:
-                    break
+        if self.simulation_mode:
+            print(f"Simulating response for command: {command}")
+            simulated_responses = {
+                '1': "Experiment 1 Start",
+                'NotGate': "Gate 1 Completed",
+                'OrGate': "Gate 2 Completed",
+                'AndGate': "Gate 3 Completed",
+                'NorGate': "Gate 4 Completed",
+            }
+            time.sleep(1)  # Simulate delay
+            response = simulated_responses.get(command, "")
+            self.log_to_terminal(f"Simulated response: {response}")
+        else:
+            self.arduino_serial.write(command.encode())
+            response = ""
+            while True:
+                if self.arduino_serial.inWaiting() > 0:
+                    time.sleep(1)  # Wait for the data to be available
+                    response = self.arduino_serial.readline().decode('utf-8').strip()
+                    print(f"Received response: {response}")
+                    self.log_to_terminal(f"Received response: {response}")
+                    if response == expected_response:
+                        break
         return response
 
     def start_experiment_1(self):
@@ -163,13 +211,14 @@ class LogicGateApp(tk.Toplevel):
         self.output_text.insert(tk.END, experiment_text)
         self.output_text.config(state=tk.DISABLED)
 
-        self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
+        if not self.simulation_mode:
+            self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
         self.send_experiment_command(selected_gates)
 
     def send_experiment_command(self, gates):
         def send_and_wait(gate):
             command = gate
-            expected_response = f"Success Gate"
+            expected_response = f"Gate {gates.index(gate) + 1} Completed"
             self.send_command_and_wait_for_response(command, expected_response)
             self.log_to_terminal(f"Sent: {command}")
             self.log_to_terminal(f"Waiting for: {expected_response}")
@@ -181,13 +230,18 @@ class LogicGateApp(tk.Toplevel):
 
     def monitor_serial_for_success(self):
         def read_serial():
-            while True:
-                if self.arduino_serial.inWaiting() > 0:
-                    my_data = self.arduino_serial.readline().decode('utf-8').strip()
-                    self.log_to_terminal(my_data)
-                    if "Experiment 1 Finish" in my_data:
-                        self.display_success_message()
-                        break
+            if self.simulation_mode:
+                time.sleep(1)  # Simulate delay
+                self.log_to_terminal("Experiment 1 Finish")
+                self.display_success_message()
+            else:
+                while True:
+                    if self.arduino_serial.inWaiting() > 0:
+                        my_data = self.arduino_serial.readline().decode('utf-8').strip()
+                        self.log_to_terminal(my_data)
+                        if "Experiment 1 Finish" in my_data:
+                            self.display_success_message()
+                            break
 
         self.serial_thread = Thread(target=read_serial, daemon=True)
         self.serial_thread.start()
@@ -242,7 +296,13 @@ class MazeApp(tk.Toplevel):
         super().__init__(master)
         self.title("Maze Challenge")
         self.geometry("800x600")
-        self.serial_port = serial_port
+    
+        self.serial_port = serial_port if serial_port else master.selected_serial_port
+        
+        if not self.serial_port:
+            messagebox.showerror("Error", "No serial port selected.")
+            self.destroy()
+            return
         self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
 
         self.grid_size = 20
@@ -264,6 +324,9 @@ class MazeApp(tk.Toplevel):
         self.destroy()
         morse_app = MorseApp(self.master, serial_port, self.finish_challenge)
         morse_app.mainloop()
+    def start_experiment_2(self):
+
+        self.arduino_serial.write(b'2')  
 
     def on_enter(self, e):
         e.widget['background'] = '#45a049'
@@ -273,6 +336,7 @@ class MazeApp(tk.Toplevel):
 
     def start_maze_game(self):
         self.start_button.destroy()
+        self.start_experiment_2()
         self.run_maze_game()
 
     def run_maze_game(self):
@@ -361,34 +425,28 @@ class MazeApp(tk.Toplevel):
             player = Character(screen, side_length, border_width, vertices, start_point, end_point, start_point, GREEN, WHITE)
             draw_position(screen, side_length, border_width, end_point, RED)
             pygame.display.flip()
-            cooldown = 100
-            start_timer = pygame.time.get_ticks()
             carryOn = True
             while carryOn:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         carryOn = False
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            carryOn = False
-                keys = pygame.key.get_pressed()
-                if pygame.time.get_ticks() - start_timer > cooldown:
+                if self.arduino_serial.in_waiting > 0:
+                    receivedMessage = self.arduino_serial.readline().decode().strip()
                     current_point = player.get_current_position()
                     next_point = None
-                    if keys[pygame.K_RIGHT] and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
+                    if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
                         next_point = (current_point[0] + 1, current_point[1])
-                    elif keys[pygame.K_LEFT] and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
+                    elif receivedMessage == "Left" and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
                         next_point = (current_point[0] - 1, current_point[1])
-                    elif keys[pygame.K_UP] and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
+                    elif receivedMessage == "Up" and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
                         next_point = (current_point[0], current_point[1] - 1)
-                    elif keys[pygame.K_DOWN] and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
+                    elif receivedMessage == "Down" and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
                         next_point = (current_point[0], current_point[1] + 1)
                     if next_point:
                         player.move_character(next_point)
                     if player.reached_goal():
                         carryOn = False
                         self.switch_to_morse_app(self.serial_port)
-                    start_timer = pygame.time.get_ticks()
                 pygame.display.update()
             pygame.quit()
         

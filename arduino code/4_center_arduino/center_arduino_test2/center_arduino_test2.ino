@@ -86,11 +86,6 @@ void loop() {
                  
                   break;
               }   
-                      
-        
-         
-
-
       } 
 
     } else if (command == '2') {
@@ -98,7 +93,7 @@ void loop() {
       Serial.println("Experiment 2 Start");
         
         
-        sendMessage("Arduino 2 get start", DESTINATION_ADDRESS_2);
+        sendMessage("Experiment 2 Start", DESTINATION_ADDRESS_2);
             
          //   sendMessage_start_maze("Arduino 2 get start");
             
@@ -109,7 +104,6 @@ void loop() {
           if (receivedMessage == "Left" || receivedMessage == "Right" || 
             receivedMessage == "Up" || receivedMessage == "Down" || receivedMessage == "No move") {
             Serial.println(receivedMessage); // Send direction to Python script
-            delay(1000);
             
         }
         // start with while If the message is left,right,up down, then send it to the python with Serial.println
