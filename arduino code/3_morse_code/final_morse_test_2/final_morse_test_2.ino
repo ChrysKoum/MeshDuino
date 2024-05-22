@@ -9,8 +9,8 @@
 
 RF22Router rf22(MY_ADDRESS); // Initiate the RF22 with the sender's address
 
-int ledPin = 7;
-int buttonPin = 8;
+int ledPin = 8;
+int buttonPin = 7;
 int debounceDelay = 90;
 
 int dotLength = 240;
