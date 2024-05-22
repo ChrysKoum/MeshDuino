@@ -16,10 +16,10 @@ const int TRIG_PIN_RIGHT=7;
 const int ECHO_PIN_RIGHT=6;
 const int TRIG_PIN_LEFT=10;
 const int ECHO_PIN_LEFT=9;
-
+int number_of_bytes=0;
 
 float duration_right,duration_left,distance_right,distance_left;
-int cnt=0;
+
  int lightValue2=0;
 int lightValue1=0;
 
@@ -66,10 +66,9 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 
-  if(receivedMessage=="Experiment 2 Start" && cnt==0)
-                    cnt++;     
-
-while(cnt==1)
+  if(receivedMessage=="Experiment 2 Start")
+{
+while(true)
 {
 
  //for the right 
@@ -104,22 +103,8 @@ while(cnt==1)
 
   bool k=false;
 
- /*
- sendMessage("Moving Right");
- delay(1000);
-  sendMessage("Moving Left");
-   delay(1000);
-  sendMessage("Moving Down");
-   delay(1000);
- sendMessage("Moving Up");
-  delay(1000);
- sendMessage("No move");
-  delay(1000);
  
- 
- */
-// Serial.println("TIMI");
- //Serial.print(lightValue2);
+
 if (distance_right < 10) {
     // Move right
     Serial.println("Moving Right");
@@ -146,14 +131,24 @@ if (distance_right < 10) {
     delay(1500);
   } else {
     // If none of the conditions are met
-    Serial.println("Nothing");
+    Serial.println("No move");
     sendMessage("No move");
     // Add your code for no movement here
     delay(1500);
   }
   
+  
+  receivedMessage = receiveMessage();
 
-}//end if from incoming
+   if(receivedMessage=="Experiment 2 Finish")
+        { 
+          break;
+        } 
+
+}//end if
+
+
+}//end while
 
 }//loop
 
@@ -175,7 +170,7 @@ void sendMessage(const char* message) {
     memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
     memcpy(data_send, message, strlen(message));
     
-    Serial.println("Attempting to send finish message...");
+    Serial.println("Attempting to send the movement...");
 
     bool success = false;
     for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
@@ -184,6 +179,9 @@ void sendMessage(const char* message) {
         if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
+            number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
+            Serial.print("Number of Bytes= ");
+            Serial.println(number_of_bytes);//
             break;
         } else {
             Serial.println("sendtoWait failed");

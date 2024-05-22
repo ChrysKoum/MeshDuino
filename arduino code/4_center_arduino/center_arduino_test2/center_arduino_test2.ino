@@ -11,6 +11,7 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 const char* gates[] = {"OrGate", "AndGate", "NorGate", "NandGate","XorGate"/*,"XnorGate"*/,"NotGate"};
+int number_of_bytes=0;
 
 void setup() {
   Serial.begin(9600); // to be able to view the results in the computer's monitor
@@ -32,6 +33,7 @@ void setup() {
   rf22.addRouteTo(DESTINATION_ADDRESS_1, DESTINATION_ADDRESS_1);
   rf22.addRouteTo(DESTINATION_ADDRESS_2, DESTINATION_ADDRESS_2);
   rf22.addRouteTo(DESTINATION_ADDRESS_3, DESTINATION_ADDRESS_3);
+
 }
 
 void loop() {
@@ -106,12 +108,17 @@ void loop() {
             Serial.println(receivedMessage); // Send direction to Python script
             
         }
-        // start with while If the message is left,right,up down, then send it to the python with Serial.println
-        if (receivedMessage == "Experiment 2 Finish") {
-          Serial.println("Experiment 2 Finish");
-          break;
+       
+
+        if (........) {  //read from pyton to  finish 
+           Serial.println("Experiment 2 Finish");
+           sendMessage("Experiment 2 Finish", DESTINATION_ADDRESS_2);
+                  break; 
         }
+
       }
+
+
     } else if (command == '3') {
       Serial.println("Experiment 3 Start");
       sendMessage("Experiment 3 Start", DESTINATION_ADDRESS_3);
@@ -139,55 +146,6 @@ void loop() {
   }
 }
 
-void sendMessage_start_maze(const char* message) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memcpy(data_send, message, strlen(message));
-
-  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_2) != RF22_ROUTER_ERROR_NONE) { //put destination 2
-    Serial.println("sendtoWait failed");
-  } else {
-    Serial.println("sendtoWait Successful");
-  }
-}
-
-void sendMessage_logical_gates(const char* message) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memcpy(data_send, message, strlen(message));
-
-  int attemptCount = 0;
-  bool success = false;
-
-  while (!success) {
-    attemptCount++;
-    if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) {
-      Serial.print("Attempt ");
-      Serial.print(attemptCount);
-      Serial.println(": sendtoWait failed");
-    } else {
-      success = true;
-      Serial.print("Attempt ");
-      Serial.print(attemptCount);
-      Serial.println(": sendtoWait successful");
-    }
-  }
-}
-
-/**
-void sendMessage_logical_gates(const char* message) {
-  uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
-  memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
-  memcpy(data_send, message, strlen(message));
-
-  if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) != RF22_ROUTER_ERROR_NONE) { //put destination1 
-    Serial.println("sendtoWait failed"); 
-  } else {
-    Serial.println("sendtoWait Successful");
-  }
-}
-*/
-
 void sendMessage(const char *message, uint8_t destination) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
     memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
@@ -202,6 +160,10 @@ void sendMessage(const char *message, uint8_t destination) {
         if (rf22.sendtoWait(data_send, strlen(message), destination) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
+            number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
+            Serial.print("Number of Bytes= ");
+            Serial.println(number_of_bytes);//
+
             break;
         } else {
             Serial.println("sendtoWait failed");

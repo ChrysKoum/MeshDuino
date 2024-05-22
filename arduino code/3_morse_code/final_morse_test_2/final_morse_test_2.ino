@@ -14,6 +14,8 @@ int buttonPin = 8;
 int debounceDelay = 90;
 
 int dotLength = 240;
+int number_of_bytes=0;
+
 // dotLength = basic unit of speed in milliseconds
 // 240 gives 5 words per minute (WPM) speed.
 // WPM = 1200/dotLength.
@@ -72,7 +74,7 @@ void setup() {
     if (!rf22.init()) // initialize my radio
         Serial.println("RF22 init failed");
     // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36
-    if (!rf22.setFrequency(434.0)) // set the desired frequency
+    if (!rf22.setFrequency(442.0)) // set the desired frequency
         Serial.println("setFrequency Fail");
     rf22.setTxPower(RF22_TXPOW_20DBM); // set the desired power for my transmitter in dBm
     // 1,2,5,8,11,14,17,20 DBM
@@ -305,6 +307,9 @@ void sendFinishMessage(const char *message) {
         if (rf22.sendtoWait(data_send, strlen(message), DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
+            number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
+            Serial.print("Number of Bytes= ");
+            Serial.println(number_of_bytes);//
             break;
         } else {
             Serial.println("sendtoWait failed");
