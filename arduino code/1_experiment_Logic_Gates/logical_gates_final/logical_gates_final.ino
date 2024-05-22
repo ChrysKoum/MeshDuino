@@ -9,16 +9,16 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 3; // the number of the pushbutton pin
-const int button2Pin = 11; // the number of the pushbutton pin
-const int OutputLedPin = 12; // the number of the Output LED pin
-const int NotGate = 4;
-const int OrGate = 5;
-const int AndGate = 6;
-const int NorGate = 7;
-const int NandGate = 8;
-const int XorGate = 9;
-const int XnorGate = 10;
+const int button1Pin = 15; // the number of the pushbutton pin
+const int button2Pin = 16; // the number of the pushbutton pin
+const int OutputLedPin = 13; // the number of the Output LED pin
+const int NotGate = 3;
+const int OrGate = 4;
+const int AndGate = 5;
+const int NorGate = 6;
+const int NandGate = 7;
+const int XorGate = 8;
+const int XnorGate =9; 
 int number_of_bytes=0;
 // variables will change:
 int button1State = 0; // variable for reading the pushbutton status
@@ -87,7 +87,7 @@ void setup() {
   pinMode(button2Pin, INPUT);
 
   Serial.begin(9600);
-
+ 
   if (!rf22.init()) {
     Serial.println("RF22 init failed");
   }
