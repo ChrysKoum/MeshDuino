@@ -9,13 +9,13 @@
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
 // constants won't change. They're used here to set pin numbers:
-const int button1Pin = 12; // the number of the pushbutton pin
-const int button2Pin = 3; // the number of the pushbutton pin
-const int OutputLedPin = 7; // the number of the Output LED pin
+const int button1Pin = 3; // the number of the pushbutton pin
+const int button2Pin = 11; // the number of the pushbutton pin
+const int OutputLedPin = 12; // the number of the Output LED pin
 const int NotGate = 4;
 const int OrGate = 5;
 const int AndGate = 6;
-const int NorGate = 13;
+const int NorGate = 7;
 const int NandGate = 8;
 const int XorGate = 9;
 const int XnorGate = 10;

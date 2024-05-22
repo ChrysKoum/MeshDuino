@@ -87,7 +87,7 @@ void loop() {
                  delay(1000);
                  
                   break;
-              }   
+               }   
       } 
 
     } else if (command == '2') {
@@ -130,7 +130,7 @@ void loop() {
           wordToDecode.trim();
           Serial.println("wordToDecode: " + String(wordToDecode));
           sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
-          break;
+          break;0
         }
       }
 
