@@ -14,7 +14,7 @@ int buttonPin = 7;
 int debounceDelay = 90;
 
 int dotLength = 240;
-int number_of_bytes=0;
+
 
 // dotLength = basic unit of speed in milliseconds
 // 240 gives 5 words per minute (WPM) speed.
