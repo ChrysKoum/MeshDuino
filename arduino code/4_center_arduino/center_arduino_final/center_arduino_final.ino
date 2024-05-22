@@ -110,7 +110,7 @@ void loop() {
         }
        
 
-        if (........) {  //read from pyton to  finish 
+        if (receivedMessage == "Experiment 2 Finish") {  //read from pyton to  finish 
            Serial.println("Experiment 2 Finish");
            sendMessage("Experiment 2 Finish", DESTINATION_ADDRESS_2);
                   break; 
