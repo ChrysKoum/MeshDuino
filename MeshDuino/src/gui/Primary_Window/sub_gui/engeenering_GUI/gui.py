@@ -305,8 +305,8 @@ class MazeApp(tk.Toplevel):
             return
         self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
 
-        self.grid_size = 20
-        self.side_length = 20
+        self.grid_size = 5
+        self.side_length = 5
         self.mode = 0  # Solo mode
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", width=800, height=600)
