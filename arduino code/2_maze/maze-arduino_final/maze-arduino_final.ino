@@ -101,8 +101,18 @@ while(true)
   lightValue1 = analogRead(PHOTO_RESISTOR1_PIN);
   lightValue2 = analogRead(PHOTO_RESISTOR2_PIN);
 
-  bool k=false;
 
+
+String   finishMessage = receiveMessage();
+
+   if(finishMessage=="Experiment 2 Finish")
+        {  Serial.println("Experiment 2 Finish");
+          while(true){
+
+
+
+          }
+        } 
  
 
 if (distance_right < 10) {
@@ -138,16 +148,7 @@ if (distance_right < 10) {
   }
   
   
-  receivedMessage = receiveMessage();
 
-   if(receivedMessage=="Experiment 2 Finish")
-        {  Serial.println("Experiment 2 Finish");
-          while(true){
-
-
-
-          }
-        } 
 
 }//end if
 
@@ -177,7 +178,7 @@ void sendMessage(const char* message) {
     Serial.println("Attempting to send the movement...");
 
     bool success = false;
-    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
+    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
         Serial.print("Attempt ");
         Serial.println(attempt + 1);
         if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
@@ -188,13 +189,21 @@ void sendMessage(const char* message) {
             Serial.println(number_of_bytes);//
             break;
         } else {
-            Serial.println("sendtoWait failed");
+                   
+              Serial.println("sendtoWait failed");
         }
         delay(1000); // Wait 1 second before retrying
     }
-
+            
     if (!success) {
         Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Experiment 2 Finish");
+        
+        while(true){
+          
+        
+
+        }
     }
 
 
