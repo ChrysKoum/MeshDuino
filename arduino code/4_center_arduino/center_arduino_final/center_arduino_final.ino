@@ -10,7 +10,6 @@
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
-const char* gates[] = {"OrGate", "AndGate", "NorGate", "NandGate","XorGate"/*,"XnorGate"*/,"NotGate"};
 int number_of_bytes=0;
 
 void setup() {
@@ -42,22 +41,22 @@ void loop() {
     
     if (command == '1') {
 
-
-       //sendMessage_logical_gates#("Experiment 1 Start");
-
-         sendMessage("Experiment 1 Start",DESTINATION_ADDRESS_1);
-      // Select 4 random gates
-      int selectedGates[4];
-      for (int i = 0; i <4 ; i++) {
-        selectedGates[i] = random(0, 6); // Randomly select an index from 0 to 6
-      }
-
-      for (int i = 0; i <4; i++) { 
-
-        
-       // sendMessage_logical_gates(gates[selectedGates[i]]);
        
-        sendMessage(gates[selectedGates[i]],DESTINATION_ADDRESS_1);
+      Serial.println("Experiment 1 Start");
+
+      sendMessage("Experiment 1 Start",DESTINATION_ADDRESS_1);
+      // Wait for the word that needs decoding
+      for (int i = 0; i <1; i++) { 
+        while (true) {
+          if (Serial.available()) {
+            String gate = Serial.readStringUntil('\n');
+            gate.trim();
+            Serial.println("gate: " + String(gate));
+            sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
+            break;
+          }
+        }
+
 
         while (true) {
           String receiveGateMessage=receiveMessage();
@@ -103,20 +102,34 @@ void loop() {
       
          String receivedMessage = receiveMessage();
 
-          if (receivedMessage == "Left" || receivedMessage == "Right" || 
-            receivedMessage == "Up" || receivedMessage == "Down" || receivedMessage == "No move") {
-            Serial.println(receivedMessage); // Send direction to Python script
+          if (receivedMessage == "l" || receivedMessage == "r" || 
+            receivedMessage == "u" || receivedMessage == "d" || receivedMessage == "n") {
             
+            if (receivedMessage == "l") {
+                Serial.println("Left"); // Send direction to Python script
+            } else if (receivedMessage == "r") {
+                Serial.println("Right"); // Send direction to Python script
+            } else if (receivedMessage == "u") {
+                Serial.println("Up"); // Send direction to Python script
+            } else if (receivedMessage == "d") {
+                Serial.println("Down"); // Send direction to Python script
+            } else if (receivedMessage == "n") {
+                Serial.println("No move"); // Send direction to Python script
+            }
         }
-       
 
-        if (receivedMessage == "Experiment 2 Finish") {  //read from pyton to  finish 
-           Serial.println("Experiment 2 Finish");
-           sendMessage("Experiment 2 Finish", DESTINATION_ADDRESS_2);
-                  break; 
-        }
-
+            
       }
+       
+      if (Serial.available()) {
+        Serial.println("Experiment 2 Finish");
+        String message = Serial.readStringUntil('\n');
+        message.trim();
+        sendMessage(message.c_str(), DESTINATION_ADDRESS_2);
+        break; 
+      }
+
+    }
 
 
     } else if (command == '3') {
@@ -130,7 +143,7 @@ void loop() {
           wordToDecode.trim();
           Serial.println("wordToDecode: " + String(wordToDecode));
           sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
-          break;0
+          break;
         }
       }
 

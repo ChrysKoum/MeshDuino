@@ -109,30 +109,30 @@ if (distance_right < 10) {
     // Move right
     Serial.println("Moving Right");
     Serial.print(distance_right);
-    sendMessage("Right");
+    sendMessage("r");
     delay(1500);
   } else if (distance_left < 10) {
     // Move left
     Serial.println("Moving Left");
     Serial.print(distance_left);
-    sendMessage("Left");
+    sendMessage("l");
     delay(1500);
   } else if (lightValue2 < 400) {
     // Move down
     Serial.println("Moving Down");
-    sendMessage("Down");
+    sendMessage("d");
     Serial.println(lightValue2);
     delay(1500);
   } else if (lightValue1 < 400) {
     // Move up
     Serial.println("Moving Up");
-    sendMessage("Up");
+    sendMessage("u");
     Serial.println(lightValue1);
     delay(1500);
   } else {
     // If none of the conditions are met
     Serial.println("No move");
-    sendMessage("No move");
+    sendMessage("n");
     // Add your code for no movement here
     delay(1500);
   }
@@ -140,7 +140,7 @@ if (distance_right < 10) {
   
   receivedMessage = receiveMessage();
 
-   if(receivedMessage=="Experiment 2 Finish")
+   if(receivedMessage=="f")
         { 
           break;
         } 
@@ -190,7 +190,7 @@ void sendMessage(const char* message) {
     }
 
     if (!success) {
-        Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Failed to send finish message after 5 attempts.");
     }
 
 

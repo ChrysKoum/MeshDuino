@@ -20,7 +20,17 @@ from backend.maze_handler.graph import Graph
 # Global variables
 logic_gate_app = None
 maze_app = None
+morse_app = None
 start_time = None
+# Morse code dictionary
+MORSE_CODE_DICT = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
+    'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
+    'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
+    'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+    'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--',
+    'Z': '--..'
+}
 words = [
     'APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY',
     'MANGO', 'PLUMS', 'OLIVE', 'PEARS', 'APRIC',
@@ -38,8 +48,8 @@ def make_arduino_connection(port, baudrate, simulation_mode=False):
         arduino_serial = serial.Serial(port, baudrate)
         time.sleep(2)  # Wait for the connection to establish
         return arduino_serial
-    except serial.SerialException:
-        print("Port not open. Testing.")
+    except serial.SerialException as e:
+        print(f"Port not open. Error: {e}")
         sys.exit()
 
 
@@ -71,8 +81,11 @@ def EngeeneringApp(parent):
         if serial_port.get():
             port_selection_window.destroy()
             # logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
-            logic_gate_app = MazeApp(parent, serial_port.get())
-            logic_gate_app.mainloop()
+            # logic_gate_app.mainloop()
+            # maze_app = MazeApp(parent, serial_port.get())
+            # maze_app.mainloop()
+            morse_app = MorseApp(parent, serial_port.get(), finish_callback)
+            morse_app.mainloop()
         else:
             messagebox.showerror("Selection Error", "Please select a serial port.")
 
@@ -184,61 +197,67 @@ class LogicGateApp(tk.Toplevel):
         e.widget['background'] = '#2196F3'
 
     def display_success_message(self):
-        messagebox.showinfo("Success", "Experiment 1 Finished")
+        self.output_text.config(state=tk.NORMAL)
+        self.output_text.insert(tk.END, "\nExperiment 1 Finish")
+        self.output_text.config(state=tk.DISABLED)
+
+        self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
 
     def send_command_and_wait_for_response(self, command, expected_response):
-        print(f"Sending command: {command}")
-        self.log_to_terminal(f"Sending command: {command}")
-        if self.simulation_mode:
-            print(f"Simulating response for command: {command}")
-            simulated_responses = {
-                '1': "Experiment 1 Start",
-                'NotGate': "Gate 1 Completed",
-                'OrGate': "Gate 2 Completed",
-                'AndGate': "Gate 3 Completed",
-                'NorGate': "Gate 4 Completed",
-            }
-            time.sleep(1)  # Simulate delay
-            response = simulated_responses.get(command, "")
-            self.log_to_terminal(f"Simulated response: {response}")
-        else:
-            self.arduino_serial.write(command.encode())
-            response = ""
-            while True:
-                if self.arduino_serial.inWaiting() > 0:
-                    time.sleep(1)  # Wait for the data to be available
-                    response = self.arduino_serial.readline().decode('utf-8').strip()
-                    print(f"Received response: {response}")
-                    self.log_to_terminal(f"Received response: {response}")
-                    if response == expected_response:
-                        break
-        return response
+        def task():
+            print(f"Sending command: {command}")
+            self.log_to_terminal(f"Sending command: {command}")
+            if self.simulation_mode:
+                print(f"Simulating response for command: {command}")
+                simulated_responses = {
+                    '1': "Experiment 1 Start",
+                    'NotGate': "Experiment 1 Finish",
+                }
+                time.sleep(1)  # Simulate delay
+                response = simulated_responses.get(command, "")
+                self.log_to_terminal(f"Simulated response: {response}")
+            else:
+                self.arduino_serial.write(command.encode())
+                response = ""
+                while True:
+                    if self.arduino_serial.inWaiting() > 0:
+                        time.sleep(1)  # Wait for the data to be available
+                        response = self.arduino_serial.readline().decode('utf-8').strip()
+                        print(f"Received response: {response}")
+                        self.log_to_terminal(f"Received response: {response}")
+                        if response == expected_response:
+                            break
+            return response
+
+        thread = Thread(target=task)
+        thread.start()
 
     def start_experiment_1(self):
         self.output_text.config(state=tk.NORMAL)
         self.output_text.delete('1.0', tk.END)
 
         gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
-        selected_gates = random.sample(gates, 4)
+        selected_gate = 'NotGate' #random.sample(gates, 1)[0]
 
-        experiment_text = "\n".join([f"{gate}" for gate in selected_gates])
-        self.output_text.insert(tk.END, experiment_text)
+        self.output_text.insert(tk.END, f"Selected gate: {selected_gate}\n")
         self.output_text.config(state=tk.DISABLED)
 
         if not self.simulation_mode:
             self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
-        self.send_experiment_command(selected_gates)
+        self.send_experiment_command(selected_gate)
 
-    def send_experiment_command(self, gates):
+    def send_experiment_command(self, gate):
         def send_and_wait(gate):
             command = gate
-            expected_response = f"Gate {gates.index(gate) + 1} Completed"
+            expected_response = "Experiment 1 Finish"
+            print(f"Sending command: {command}")
+            self.log_to_terminal(f"Sending command: {command}")
+            print(f"Waiting for response: {expected_response}")
             self.send_command_and_wait_for_response(command, expected_response)
             self.log_to_terminal(f"Sent: {command}")
             self.log_to_terminal(f"Waiting for: {expected_response}")
 
-        for gate in gates:
-            self.after(100, send_and_wait, gate)  # Delay to avoid blocking
+        self.after(100, send_and_wait, gate)  # Delay to avoid blocking
 
         self.monitor_serial_for_success()
 
@@ -251,6 +270,7 @@ class LogicGateApp(tk.Toplevel):
             else:
                 while True:
                     if self.arduino_serial.inWaiting() > 0:
+                        time.sleep(0.4)  # Add a small delay to ensure all incoming messages are read
                         my_data = self.arduino_serial.readline().decode('utf-8').strip()
                         self.log_to_terminal(my_data)
                         if "Experiment 1 Finish" in my_data:
@@ -268,13 +288,16 @@ class LogicGateApp(tk.Toplevel):
         self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
 
     def start_experiment_2(self):
-        self.switch_to_maze_app(self.serial_port)
+        self.switch_to_maze_app(self, self.serial_port, self.arduino_serial)
 
     def log_to_terminal(self, message):
-        self.terminal_text.config(state=tk.NORMAL)
-        self.terminal_text.insert(tk.END, message + '\n')
-        self.terminal_text.config(state=tk.DISABLED)
-        self.terminal_text.see(tk.END)
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
+
+        self.after(0, update_terminal)
 
     def show_help(self):
         help_window = Toplevel(self)
@@ -304,39 +327,59 @@ class LogicGateApp(tk.Toplevel):
         """
 
         Label(help_window, text=help_text, font=("Montserrat", 14), fg="#171435", bg="#FFFFFF", justify=LEFT, wraplength=580).pack(pady=10, padx=20)
-
+        
 class MazeApp(tk.Toplevel):
-    def __init__(self, master, serial_port):
+    def __init__(self, master, serial_port, arduino_serial = None):
         super().__init__(master)
         self.title("Maze Challenge")
         self.geometry("800x600")
 
-        self.serial_port = serial_port if serial_port else master.selected_serial_port
+        self.serial_port = serial_port 
+        print(f"Selected serial port: {self.serial_port}")
+        if arduino_serial is None:
+            self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
+        else:
+            self.arduino_serial = arduino_serial
 
-        if not self.serial_port:
-            messagebox.showerror("Error", "No serial port selected.")
-            self.destroy()
-            return
-        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
-
-        self.grid_size = 10
-        self.side_length = 10
+        self.grid_size = 5
+        self.side_length = 5
         self.mode = 0  # Solo mode
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        self.start_button = tk.Button(self, text="Start Experiment 2", command=self.start_maze_game, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'), activebackground='#45a049', bd=0, padx=10, pady=5)
-        self.start_button.place(x=400, y=550)
-        self.start_button.bind("<Enter>", self.on_enter)
-        self.start_button.bind("<Leave>", self.on_leave)
+        self.create_widgets()
 
         self.pause_event = Event()
         self.pause_event.set()
+        
+    def create_widgets(self):
+        self.terminal_text = Text(self, height=10, width=80, state=DISABLED)
+        self.canvas.create_window(400, 400, window=self.terminal_text)
 
-    def switch_to_morse_app(self, serial_port):
-        self.destroy()
-        morse_app = MorseApp(self.master, serial_port, self.finish_challenge)
+        self.start_button = tk.Button(self, text="Start Experiment 2", command=self.start_maze_game,
+                                      bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
+                                      activebackground='#45a049', bd=0, padx=10, pady=5)
+        self.start_button.place(x=320, y=550)
+        self.start_button.bind("<Enter>", self.on_enter)
+        self.start_button.bind("<Leave>", self.on_leave)
+
+    def log_to_terminal(self, message):
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
+
+        self.after(0, update_terminal)
+
+    def switch_to_morse_app(parent, serial_port, arduino_serial):
+        global maze_app
+        if maze_app is not None:
+            maze_app.destroy()
+            maze_app = None  # Ensure reference is cleared
+        global morse_app
+        morse_app = MorseApp(parent, serial_port, finish_callback, arduino_serial)
         morse_app.mainloop()
 
     def start_experiment_2(self):
@@ -448,10 +491,10 @@ class MazeApp(tk.Toplevel):
             while carryOn:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        self.arduino_serial.write(b'Experiment 2 Finish') 
                         carryOn = False
                 if self.arduino_serial.in_waiting > 0:
                     receivedMessage = self.arduino_serial.readline().decode().strip()
+                    self.log_to_terminal(receivedMessage)  # Log received message to terminal
                     current_point = player.get_current_position()
                     next_point = None
                     if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
@@ -466,7 +509,10 @@ class MazeApp(tk.Toplevel):
                         player.move_character(next_point)
                     if player.reached_goal():
                         carryOn = False
-                        self.switch_to_morse_app(self.serial_port)
+                        print("Maze completed")
+                        self.arduino_serial.write(b'Experiment 2 Finish')
+                        time.sleep(2);
+                        self.switch_to_morse_app(self.serial_port, self.arduino_serial)
                 pygame.display.update()
             pygame.quit()
 
@@ -474,12 +520,16 @@ class MazeApp(tk.Toplevel):
 
 
 class MorseApp(tk.Toplevel):
-    def __init__(self, master, serial_port, finish_callback):
+    def __init__(self, master, serial_port, finish_callback, arduino_serial=None):
         super().__init__(master)
         self.title("Morse App")
         self.geometry("800x600")
         self.serial_port = serial_port
-        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
+        print(f"Selected serial port: {self.serial_port}")
+        if arduino_serial is None:
+            self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
+        else:
+            self.arduino_serial = arduino_serial
         self.finish_callback = finish_callback
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
@@ -487,7 +537,7 @@ class MorseApp(tk.Toplevel):
 
         self.create_widgets()
         global start_time
-        self.start_time = time.time()
+        start_time = time.time()
 
     def create_widgets(self):
         self.output_text = Text(self, height=10, width=30, state=tk.DISABLED)
@@ -495,6 +545,9 @@ class MorseApp(tk.Toplevel):
 
         self.terminal_text = Text(self, height=10, width=80, state=tk.DISABLED)
         self.canvas.create_window(400, 400, window=self.terminal_text)
+
+        self.morse_text = Text(self, height=10, width=30, state=tk.DISABLED)
+        self.canvas.create_window(200, 170, window=self.morse_text)
 
         self.read_serial_button = tk.Button(self, text="Start Experiment 3", command=self.start_experiment_3,
                                             bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
@@ -518,23 +571,29 @@ class MorseApp(tk.Toplevel):
         self.output_text.config(state=tk.DISABLED)
 
         self.send_experiment_command(word)
+        self.display_morse_code(word)
         self.monitor_serial_for_success()
 
     def select_random_word(self):
-            with open('words.json', 'r') as f:
-                words = json.load(f)
-            selected_word = random.choice(words)
-            print(f"Selected word for decoding: {selected_word}")
-            return selected_word
-    
+        selected_word = random.choice(words)
+        print(f"Selected word for decoding: {selected_word}")
+        return selected_word
+
     def send_experiment_command(self, word):
-        command = "3\n"
-        self.arduino_serial.write(command.encode())
+        self.arduino_serial.write(b'3')  # Send '3' to start
         self.log_to_terminal("Experiment 3 Start")
         time.sleep(5)  # Wait for the connection to establish
 
-        self.arduino_serial.write(word.encode())
+        self.arduino_serial.write(word.encode())  # Send the selected word
         self.log_to_terminal(f"Sent word: {word}")
+
+    def display_morse_code(self, word):
+        self.morse_text.config(state=tk.NORMAL)
+        self.morse_text.delete('1.0', tk.END)
+        for letter in word:
+            morse_code = MORSE_CODE_DICT.get(letter.upper(), '')
+            self.morse_text.insert(tk.END, f"{letter}: {morse_code}\n")
+        self.morse_text.config(state=tk.DISABLED)
 
     def monitor_serial_for_success(self):
         def read_serial():
@@ -556,25 +615,29 @@ class MorseApp(tk.Toplevel):
         self.finish_callback()
 
     def log_to_terminal(self, message):
-        self.terminal_text.config(state=tk.NORMAL)
-        self.terminal_text.insert(tk.END, message + '\n')
-        self.terminal_text.config(state=tk.DISABLED)
-        self.terminal_text.see(tk.END)
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
 
-def switch_to_maze_app(parent, serial_port):
-    logic_gate_app.destroy()
+        self.after(0, update_terminal)
+
+
+def switch_to_maze_app(parent, serial_port, arduino_serial):
+    global logic_gate_app
+    if logic_gate_app is not None:
+        logic_gate_app.destroy()
+        logic_gate_app = None  # Ensure reference is cleared
     global maze_app
-    maze_app = MazeApp(parent, serial_port)
+    maze_app = MazeApp(parent, serial_port, arduino_serial)
     maze_app.mainloop()
 
-def switch_to_morse_app(parent, serial_port):
-    maze_app.destroy()
-    global morse_app
-    morse_app = MorseApp(parent, serial_port, finish_callback)
-    morse_app.mainloop()
+
 
 
 def finish_callback():
+    print(f"Experiment 3 Finish. Showing Results...")
     global start_time
     end_time = time.time()
     duration = end_time - start_time
