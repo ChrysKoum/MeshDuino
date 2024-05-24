@@ -117,17 +117,17 @@ void loop() {
       Serial.println("Experiment 2 Start");
         
         
-        sendMessage("Experiment 2 Start", DESTINATION_ADDRESS_2);
+        sendMessage("e2s", DESTINATION_ADDRESS_2);
             
          //   sendMessage_start_maze("Arduino 2 get start");
             
       while (true) {
-      
+
          String receivedMessage = receiveMessage();
 
           if (receivedMessage == "l" || receivedMessage == "r" || 
             receivedMessage == "u" || receivedMessage == "d" || receivedMessage == "n") {
-            
+
             if (receivedMessage == "l") {
                 Serial.println("Left"); // Send direction to Python script
             } else if (receivedMessage == "r") {
@@ -141,7 +141,7 @@ void loop() {
             }
         }
 
-            
+      
       }
        
       if (Serial.available()) {
@@ -157,7 +157,7 @@ void loop() {
 
     } else if (command == '3') {
       Serial.println("Experiment 3 Start");
-      sendMessage("Experiment 3 Start", DESTINATION_ADDRESS_3);
+      sendMessage("e3s", DESTINATION_ADDRESS_3);
 
       // Wait for the word that needs decoding
       while (true) {
@@ -173,7 +173,7 @@ void loop() {
       // Wait for the "Experiment 3 Finish" message
       while (true) {
         String receivedMessage = receiveMessage();
-        if (receivedMessage == "Experiment 3 Finish") {
+        if (receivedMessage == "e3f") {
           Serial.println("Experiment 3 Finish");
           break;
         }

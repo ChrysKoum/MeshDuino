@@ -98,7 +98,7 @@ void loop() {
     // Check for received message
     String receivedMessage = receiveMessage();
 
-    if (receivedMessage == "Experiment 3 Start") {
+    if (receivedMessage == "e3s") {
         delay(5000); // Delay for 5 seconds
 
         // Wait for the word to decode
@@ -211,9 +211,9 @@ void loop() {
 
                     // Check if the sequence is completed
                     if (decodedLetters.endsWith(wordToDecode)) { // Update this condition as per your requirement
-                        Serial.println(" Success");
+                        Serial.println("Success");
                         decodedLetters = ""; // Optionally reset the decoded sequence
-                        sendFinishMessage("Experiment 3 Finish");
+                        sendFinishMessage("e3f");
                         break;
                     }
                     

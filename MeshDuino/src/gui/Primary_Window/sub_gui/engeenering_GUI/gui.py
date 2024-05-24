@@ -80,12 +80,12 @@ def EngeeneringApp(parent):
             serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
         if serial_port.get():
             port_selection_window.destroy()
-            # logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
-            # logic_gate_app.mainloop()
+            logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
+            logic_gate_app.mainloop()
             # maze_app = MazeApp(parent, serial_port.get())
             # maze_app.mainloop()
-            morse_app = MorseApp(parent, serial_port.get(), finish_callback)
-            morse_app.mainloop()
+            # morse_app = MorseApp(parent, serial_port.get(), finish_callback)
+            # morse_app.mainloop()
         else:
             messagebox.showerror("Selection Error", "Please select a serial port.")
 

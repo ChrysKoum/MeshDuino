@@ -66,7 +66,7 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 
-  if(receivedMessage=="Experiment 2 Start")
+  if(receivedMessage=="e2s")
 {
 while(true)
 {
