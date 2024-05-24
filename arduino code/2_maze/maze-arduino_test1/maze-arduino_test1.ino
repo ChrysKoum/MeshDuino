@@ -12,16 +12,16 @@ RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_A
 
 const int PHOTO_RESISTOR2_PIN=A1;
 const int PHOTO_RESISTOR1_PIN=A0;
-const int TRIG_PIN_RIGHT=7;
-const int ECHO_PIN_RIGHT=6;
-const int TRIG_PIN_LEFT=5;
-const int ECHO_PIN_LEFT=4;
-int number_of_bytes=0;
+const int TRIG_PIN_RIGHT=13;
+const int ECHO_PIN_RIGHT=12;
+const int TRIG_PIN_LEFT=11;
+const int ECHO_PIN_LEFT=10;
+
 
 float duration_right,duration_left,distance_right,distance_left;
-
- int lightValue2=0;
-int lightValue1=0;
+int cnt=0;
+ int forceValue=0;
+int lightValue=0;
 
 void sendMessage(const char* message);
 String receiveMessage();
@@ -34,9 +34,9 @@ void setup() {
   pinMode(TRIG_PIN_LEFT, OUTPUT);
   pinMode(ECHO_PIN_LEFT, INPUT);
   
-  pinMode(PHOTO_RESISTOR1_PIN, INPUT); // Configure force sensor pin as input
+  pinMode(FORCE_SENSOR_PIN, INPUT); // Configure force sensor pin as input
   
-  pinMode(PHOTO_RESISTOR1_PIN, INPUT); // Configure photoresistor pin as input
+  pinMode(PHOTO_RESISTOR_PIN, INPUT); // Configure photoresistor pin as input
   
     Serial.begin(9600);
  
@@ -66,9 +66,11 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 
-  if(receivedMessage=="Experiment 2 Start")
-{
-while(true)
+  if(receivedMessage=="Experiment 2 Start" && cnt==0)
+                    cnt++;
+      
+
+if(cnt==1)
 {
 
  //for the right 
@@ -101,59 +103,78 @@ while(true)
   lightValue1 = analogRead(PHOTO_RESISTOR1_PIN);
   lightValue2 = analogRead(PHOTO_RESISTOR2_PIN);
 
+  bool k=false;
 
-
-String   finishMessage = receiveMessage();
-
-   if(finishMessage=="Experiment 2 Finish")
-        {  Serial.println("Experiment 2 Finish");
-          while(true){
-
-
-
-          }
-        } 
+ /*
+ sendMessage("Moving Right");
+ delay(1000);
+  sendMessage("Moving Left");
+   delay(1000);
+  sendMessage("Moving Down");
+   delay(1000);
+ sendMessage("Moving Up");
+  delay(1000);
+ sendMessage("No move");
+  delay(1000);
+ 
+ 
+ */
+ 
  
 
-if (distance_right < 10) {
-    // Move right
-    Serial.println("Moving Right");
-    Serial.print(distance_right);
-    sendMessage("r");
-    delay(1500);
-  } else if (distance_left < 10) {
-    // Move left
-    Serial.println("Moving Left");
-    Serial.print(distance_left);
-    sendMessage("l");
-    delay(1500);
-  } else if (lightValue2 < 150) {
-    // Move down
-    Serial.println("Moving Down");
-    sendMessage("d");
-    Serial.println(lightValue2);
-    delay(1500);
-  } else if (lightValue1 < 150) {
-    // Move up
-    Serial.println("Moving Up");
-    sendMessage("u");
-    Serial.println(lightValue1);
-    delay(1500);
-  } else {
-    // If none of the conditions are met
-    Serial.println("No move");
-    sendMessage("n");
-    // Add your code for no movement here
-    delay(1500);
-  }
+ if ( distance_right < 100) {
+  // Move right
+  Serial.println("Moving Right");
+  sendMessage("Right");
+  // Add your code to move right here
+   k=true;
+  delay(1000);
+
+}
+
+if(distance_left < 100) {
+  // Move left
+  Serial.println("Moving Left");
+  sendMessage("Left");
+  // Add your code to move left here
+  k=true;
+  delay(1000);
+ 
+}
+
+if (lightValue2 > 500) {
+  // Move down
+  Serial.println("Moving Down");
+  sendMessage("Down");
+  Serial.println(lightValue2);
+  // Add your code to move down here
+  k=true;
+  delay(1000);
   
+}
+
+if (lightValue1 > 500) {
+  // Move up
+  Serial.println("Moving Up");
+  sendMessage("Up");
+  Serial.println(lightValue1);
+  // Add your code to move up here
+  k=true;
+  
+  delay(1000);
+  
+}
+
+if (k==false) {
+  // If none of the conditions are met
+  Serial.println("Nothing");
+  sendMessage("No move");
+  // Add your code for no movement here
+  delay(1000);
+}
   
 
-
-}//end if
-
-
-}//end while
+}//end if from incoming
 
 }//loop
 
@@ -175,35 +196,24 @@ void sendMessage(const char* message) {
     memset(data_send, '\0', RF22_ROUTER_MAX_MESSAGE_LEN);
     memcpy(data_send, message, strlen(message));
     
-    Serial.println("Attempting to send the movement...");
+    Serial.println("Attempting to send finish message...");
 
     bool success = false;
-    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
+    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
         Serial.print("Attempt ");
         Serial.println(attempt + 1);
         if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
-            number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
-            Serial.print("Number of Bytes= ");
-            Serial.println(number_of_bytes);//
             break;
         } else {
-                   
-              Serial.println("sendtoWait failed");
+            Serial.println("sendtoWait failed");
         }
         delay(1000); // Wait 1 second before retrying
     }
-            
+
     if (!success) {
         Serial.println("Failed to send finish message after 3 attempts.");
-        Serial.println("Experiment 2 Finish");
-        
-        while(true){
-          
-        
-
-        }
     }
 
 
