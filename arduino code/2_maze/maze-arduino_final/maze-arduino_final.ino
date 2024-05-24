@@ -105,7 +105,7 @@ while(true)
 
 String   finishMessage = receiveMessage();
 
-   if(finishMessage=="Experiment 2 Finish")
+   if(finishMessage=="e2f")
         {  Serial.println("Experiment 2 Finish");
           while(true){
 

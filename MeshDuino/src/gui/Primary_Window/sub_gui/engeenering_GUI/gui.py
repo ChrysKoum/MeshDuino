@@ -237,7 +237,7 @@ class LogicGateApp(tk.Toplevel):
         self.output_text.delete('1.0', tk.END)
 
         gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
-        selected_gate = 'NotGate' #random.sample(gates, 1)[0]
+        selected_gate = random.sample(gates, 1)[0]
 
         self.output_text.insert(tk.END, f"Selected gate: {selected_gate}\n")
         self.output_text.config(state=tk.DISABLED)

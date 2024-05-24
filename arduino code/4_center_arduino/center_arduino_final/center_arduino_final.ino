@@ -44,7 +44,7 @@ void loop() {
        
       Serial.println("Experiment 1 Start");
 
-      sendMessage("Experiment 1 Start",DESTINATION_ADDRESS_1);
+      sendMessage("e1s",DESTINATION_ADDRESS_1);
       // Wait for the word that needs decoding
       for (int i = 0; i <1; i++) { 
         while (true) {
@@ -52,7 +52,30 @@ void loop() {
             String gate = Serial.readStringUntil('\n');
             gate.trim();
             Serial.println("gate: " + String(gate));
-            sendMessage(gate.c_str(), DESTINATION_ADDRESS_1);
+
+            if (gate == "NotGate") {
+                Serial.println("NotGate"); // Print full name
+                sendMessage("n", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "OrGate") {
+                Serial.println("OrGate"); // Print full name
+                sendMessage("o", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "AndGate") {
+                Serial.println("AndGate"); // Print full name
+                sendMessage("a", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "NorGate") {
+                Serial.println("NorGate"); // Print full name
+                sendMessage("no", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "NandGate") {
+                Serial.println("NandGate"); // Print full name
+                sendMessage("na", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "XorGate") {
+                Serial.println("XorGate"); // Print full name
+                sendMessage("xo", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "XnorGate") {
+                Serial.println("XnorGate"); // Print full name
+                sendMessage("xn", DESTINATION_ADDRESS_1); // Send shorthand version
+            }
+
             break;
           }
         }
@@ -60,11 +83,11 @@ void loop() {
 
         while (true) {
           String receiveGateMessage=receiveMessage();
-          if (receiveGateMessage == "Success") {
+          if (receiveGateMessage == "s") {
             Serial.println(receiveGateMessage); // Send direction to Python script
             delay(1000);
           }
-          if (receiveGateMessage == "Success Gate"){
+          if (receiveGateMessage == "sg"){
              delay(1000);
              break;
            
