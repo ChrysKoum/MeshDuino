@@ -197,7 +197,7 @@ void sendMessage(const char* message) {
             
     if (!success) {
         Serial.println("Failed to send finish message after 3 attempts.");
-        Serial.println("f");
+        Serial.println("Experiment 2 Finish");
         
         while(true){
           
