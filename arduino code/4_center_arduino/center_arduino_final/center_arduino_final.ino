@@ -148,7 +148,9 @@ void loop() {
         Serial.println("Experiment 2 Finish");
         String message = Serial.readStringUntil('\n');
         message.trim();
-        sendMessage(message.c_str(), DESTINATION_ADDRESS_2);
+        if(message == "Experiment 2 Finish"){
+          sendMessage("e2f", DESTINATION_ADDRESS_2);
+        }
         break; 
       }
 
@@ -208,7 +210,7 @@ void sendMessage(const char *message, uint8_t destination) {
     }
 
     if (!success) {
-        Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Failed to send finish message after 5 attempts.");
     }
 }
 
