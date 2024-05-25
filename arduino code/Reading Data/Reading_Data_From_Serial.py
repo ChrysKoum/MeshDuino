@@ -22,7 +22,7 @@ def send_command_and_wait_for_response(command, expected_response, arduino_seria
 # Function to run the selected experiments
 def run_experiments(selected_option):
     # Set up the serial connection
-    arduino_serial = serial.Serial('COM10', 9600)
+    arduino_serial = serial.Serial('COM11', 9600)
     time.sleep(2)  # Wait for the connection to establish
 
     # Start timing the whole process
@@ -30,21 +30,22 @@ def run_experiments(selected_option):
 
     # Gates list and selection of 4 random gates
     gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
-    selected_gates = random.sample(gates, 4)
-    selected_gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate']  # For testing purposes
+    selected_gates = random.sample(gates, 1)
 
     if selected_option in ['1', 'All']:
         # Experiment 1: Send '1' to start, then send each selected gate command sequentially
         send_command_and_wait_for_response('1', "Experiment 1 Start", arduino_serial)
-        for i, gate in enumerate(selected_gates, 1):
-            send_command_and_wait_for_response(gate, f"Gate {i} Completed", arduino_serial)
+        send_command_and_wait_for_response(selected_gates, "Experiment 1 Finish", arduino_serial)
         print("Experiment 1 finished.")
 
+    print("Experiment 2 Starting...")
+    time.sleep(5)  # Wait for the connection to establish
     if selected_option in ['2', 'All']:
         # Experiment 2: Send '2' to start and wait for finish
         send_command_and_wait_for_response('2', "Experiment 2 Finish", arduino_serial)
         print("Experiment 2 finished.")
 
+    print("Experiment 3 Start.")
     if selected_option in ['3', 'All']:
         # Experiment 3: Send '3' to start, send a random 5-letter word, and wait for finish
         send_command_and_wait_for_response('3', "Experiment 3 Start", arduino_serial)
