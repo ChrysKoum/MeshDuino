@@ -99,7 +99,7 @@ void loop() {
     String receivedMessage = receiveMessage();
 
     if (receivedMessage == "Experiment 3 Start") {
-        delay(5000); // Delay for 5 seconds
+        
 
         // Wait for the word to decode
         while (true) {

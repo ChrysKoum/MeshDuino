@@ -11,7 +11,7 @@ RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_A
 // constants won't change. They're used here to set pin numbers:
 const int button1Pin = 15; // the number of the pushbutton pin
 const int button2Pin = 16; // the number of the pushbutton pin
-const int OutputLedPin = 13; // the number of the Output LED pin
+const int OutputLedPin = 17; // the number of the Output LED pin
 const int NotGate = 3;
 const int OrGate = 4;
 const int AndGate = 5;
@@ -92,7 +92,7 @@ void setup() {
     Serial.println("RF22 init failed");
   }
 
-  if (!rf22.setFrequency(432.0)) {
+  if (!rf22.setFrequency(442.0)) {
     Serial.println("setFrequency Fail");
   }
 
@@ -112,31 +112,40 @@ void loop() {
       String receivedMessage = receiveMessage();
 
       // Reset all gate LEDs to LOW
-      for (int i = 4; i <= 10; i++) {
+      for (int i = 3; i <=9; i++) {
         digitalWrite(i, LOW);
       }
 
       if (receivedMessage == "OrGate") {
         digitalWrite(OrGate, HIGH);
         checkConditions(orConditions, 4);
+         digitalWrite(OrGate,LOW);
+
       } else if (receivedMessage == "AndGate") {
         digitalWrite(AndGate, HIGH);
         checkConditions(andConditions, 4);
+        digitalWrite(AndGate,LOW);
       } else if (receivedMessage == "NorGate") {
         digitalWrite(NorGate, HIGH);
         checkConditions(norConditions, 4);
+         digitalWrite(NorGate,LOW);
+
       } else if (receivedMessage == "NandGate") {
         digitalWrite(NandGate, HIGH);
         checkConditions(nandConditions, 4);
+        digitalWrite(NandGate,LOW);
       } else if (receivedMessage == "XorGate") {
         digitalWrite(XorGate, HIGH);
         checkConditions(xorConditions, 4);
+         digitalWrite(XorGate,LOW);
       } else if (receivedMessage == "XnorGate") {
         digitalWrite(XnorGate, HIGH);
         checkConditions(xnorConditions, 4);
+         digitalWrite(XnorGate,LOW);
       } else if (receivedMessage == "NotGate") {
         digitalWrite(NotGate, HIGH);
         checkNotConditions(notConditions, 2);
+         digitalWrite(NotGate,LOW);
       }
 
       if (cnt2 == 1) {
@@ -179,10 +188,11 @@ void checkConditions(bool conditions[][3], int size) {
       if (button1State == conditions[i][0] && button2State == conditions[i][1]) {
         cnt++;
         digitalWrite(OutputLedPin, conditions[i][2]);
-        delay(1000);
+        delay(1500);
+        digitalWrite(OutputLedPin,LOW);
         Serial.println("Success");
         sendMessage("Success");
-         Serial.println("After succees");
+         
 
          break;
         
@@ -190,7 +200,6 @@ void checkConditions(bool conditions[][3], int size) {
     }
 
   }
-Serial.println("yes");
 
     while (true) {
       delay(1000);
