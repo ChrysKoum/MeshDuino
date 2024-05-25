@@ -42,7 +42,7 @@ def Home(parent):
     # Adding Arduino image
     arduino_image_path = relative_to_assets("arduino_uno_1.png")
     arduino_img = Image.open(arduino_image_path)
-    arduino_img = arduino_img.resize((200, 200), Image.ANTIALIAS)  # Resize the image
+    arduino_img = arduino_img.resize((200, 200), Image.LANCZOS)  # Resize the image
     arduino_img = ImageTk.PhotoImage(arduino_img)
     canvas.create_image(200, 150, image=arduino_img, anchor="nw")
 
