@@ -10,7 +10,6 @@
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
 
-const char* gates[] = {"OrGate", "AndGate", "NorGate", "NandGate","XorGate"/*,"XnorGate"*/,"NotGate"};
 int number_of_bytes=0;
 
 void setup() {
@@ -42,30 +41,53 @@ void loop() {
     
     if (command == '1') {
 
-
-       //sendMessage_logical_gates#("Experiment 1 Start");
-
-         sendMessage("Experiment 1 Start",DESTINATION_ADDRESS_1);
-      // Select 4 random gates
-      int selectedGates[4];
-      for (int i = 0; i <4 ; i++) {
-        selectedGates[i] = random(0, 6); // Randomly select an index from 0 to 6
-      }
-
-      for (int i = 0; i <4; i++) { 
-
-        
-       // sendMessage_logical_gates(gates[selectedGates[i]]);
        
-        sendMessage(gates[selectedGates[i]],DESTINATION_ADDRESS_1);
+      Serial.println("Experiment 1 Start");
+
+      sendMessage("e1s",DESTINATION_ADDRESS_1);
+      // Wait for the word that needs decoding
+      for (int i = 0; i <1; i++) { 
+        while (true) {
+          if (Serial.available()) {
+            String gate = Serial.readStringUntil('\n');
+            gate.trim();
+            Serial.println("gate: " + String(gate));
+
+            if (gate == "NotGate") {
+                Serial.println("NotGate"); // Print full name
+                sendMessage("n", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "OrGate") {
+                Serial.println("OrGate"); // Print full name
+                sendMessage("o", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "AndGate") {
+                Serial.println("AndGate"); // Print full name
+                sendMessage("a", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "NorGate") {
+                Serial.println("NorGate"); // Print full name
+                sendMessage("no", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "NandGate") {
+                Serial.println("NandGate"); // Print full name
+                sendMessage("na", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "XorGate") {
+                Serial.println("XorGate"); // Print full name
+                sendMessage("xo", DESTINATION_ADDRESS_1); // Send shorthand version
+            } else if (gate == "XnorGate") {
+                Serial.println("XnorGate"); // Print full name
+                sendMessage("xn", DESTINATION_ADDRESS_1); // Send shorthand version
+            }
+
+            break;
+          }
+        }
+
 
         while (true) {
           String receiveGateMessage=receiveMessage();
-          if (receiveGateMessage == "Success") {
+          if (receiveGateMessage == "s") {
             Serial.println(receiveGateMessage); // Send direction to Python script
             delay(1000);
           }
-          if (receiveGateMessage == "Success Gate"){
+          if (receiveGateMessage == "sg"){
              delay(1000);
              break;
            
@@ -95,33 +117,49 @@ void loop() {
       Serial.println("Experiment 2 Start");
         
         
-        sendMessage("Experiment 2 Start", DESTINATION_ADDRESS_2);
+        sendMessage("e2s", DESTINATION_ADDRESS_2);
             
          //   sendMessage_start_maze("Arduino 2 get start");
             
       while (true) {
-      
+
          String receivedMessage = receiveMessage();
 
-          if (receivedMessage == "Left" || receivedMessage == "Right" || 
-            receivedMessage == "Up" || receivedMessage == "Down" || receivedMessage == "No move") {
-            Serial.println(receivedMessage); // Send direction to Python script
-            
-        }
-       
+          if (receivedMessage == "l" || receivedMessage == "r" || 
+            receivedMessage == "u" || receivedMessage == "d" || receivedMessage == "n") {
 
-        if (receivedMessage == "Experiment 2 Finish") {  //read from pyton to  finish 
-           Serial.println("Experiment 2 Finish");
-           sendMessage("Experiment 2 Finish", DESTINATION_ADDRESS_2);
-                  break; 
+            if (receivedMessage == "l") {
+                Serial.println("Left"); // Send direction to Python script
+            } else if (receivedMessage == "r") {
+                Serial.println("Right"); // Send direction to Python script
+            } else if (receivedMessage == "u") {
+                Serial.println("Up"); // Send direction to Python script
+            } else if (receivedMessage == "d") {
+                Serial.println("Down"); // Send direction to Python script
+            } else if (receivedMessage == "n") {
+                Serial.println("No move"); // Send direction to Python script
+            }
         }
 
+      
       }
+       
+      if (Serial.available()) {
+        Serial.println("Experiment 2 Finish");
+        String message = Serial.readStringUntil('\n');
+        message.trim();
+        if(message == "Experiment 2 Finish"){
+          sendMessage("e2f", DESTINATION_ADDRESS_2);
+        }
+        break; 
+      }
+
+    }
 
 
     } else if (command == '3') {
       Serial.println("Experiment 3 Start");
-      sendMessage("Experiment 3 Start", DESTINATION_ADDRESS_3);
+      sendMessage("e3s", DESTINATION_ADDRESS_3);
 
       // Wait for the word that needs decoding
       while (true) {
@@ -130,14 +168,14 @@ void loop() {
           wordToDecode.trim();
           Serial.println("wordToDecode: " + String(wordToDecode));
           sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
-          break;0
+          break;
         }
       }
 
       // Wait for the "Experiment 3 Finish" message
       while (true) {
         String receivedMessage = receiveMessage();
-        if (receivedMessage == "Experiment 3 Finish") {
+        if (receivedMessage == "e3f") {
           Serial.println("Experiment 3 Finish");
           break;
         }
@@ -172,7 +210,7 @@ void sendMessage(const char *message, uint8_t destination) {
     }
 
     if (!success) {
-        Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Failed to send finish message after 5 attempts.");
     }
 }
 

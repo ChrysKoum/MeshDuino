@@ -6,7 +6,7 @@ import os
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path("./assets")
-DATA_PATH = OUTPUT_PATH / Path("./data")  # Folder where the ranking data files are stored
+DATA_PATH = OUTPUT_PATH / Path("./data/leaderboard.txt")  # Path to the leaderboard.txt file
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
@@ -19,20 +19,24 @@ def calculate_total_time(*times):
     minutes, seconds = divmod(total_seconds, 60)
     return f"{minutes:02}:{seconds:02}"
 
-def load_ranking_data(folder_path):
+def load_ranking_data(file_path):
     ranking_data = []
-    for idx, file in enumerate(sorted(os.listdir(folder_path))):
-        if file.endswith(".txt"):
-            with open(os.path.join(folder_path, file), "r") as f:
-                lines = f.read().splitlines()
-                if len(lines) >= 4:
-                    team_name = lines[0]
-                    logic_gates_time = lines[1]
-                    maze_time = lines[2]
-                    morse_time = lines[3]
-                    total_time = calculate_total_time(logic_gates_time, maze_time, morse_time)
-                    ranking_data.append((idx + 1, team_name, logic_gates_time, maze_time, morse_time, total_time))
-    return ranking_data
+    with open(file_path, "r") as f:
+        lines = f.read().splitlines()
+        for idx, line in enumerate(lines):
+            if line.strip():
+                parts = line.strip(" end").split(", ")
+                team_name = parts[0]
+                logic_gates_time = parts[1]
+                maze_time = parts[2]
+                morse_time = parts[3]
+                total_time = calculate_total_time(logic_gates_time, maze_time, morse_time)
+                ranking_data.append((team_name, logic_gates_time, maze_time, morse_time, total_time))
+    # Sort ranking data by total time
+    ranking_data.sort(key=lambda x: int(x[4].split(":")[0]) * 60 + int(x[4].split(":")[1]))
+    # Add ranks
+    ranking_data_with_ranks = [(idx + 1, *data) for idx, data in enumerate(ranking_data)]
+    return ranking_data_with_ranks
 
 def Leaderboard(parent):
     canvas = Canvas(
@@ -116,9 +120,15 @@ def Leaderboard(parent):
     table.column("Morse Time", anchor='center', width=100)
     table.column("Total Time", anchor='center', width=100)
 
-    # Load ranking data from files and insert into the table
+    # Load ranking data from the file and insert into the table
     ranking_data = load_ranking_data(DATA_PATH)
     for item in ranking_data:
         table.insert('', 'end', values=item)
 
     table.place(x=265, y=170)
+
+if __name__ == "__main__":
+    root = Tk()
+    root.geometry("1024x768")
+    Leaderboard(root)
+    root.mainloop()

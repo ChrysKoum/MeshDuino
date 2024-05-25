@@ -10,7 +10,7 @@ from threading import Thread, Event
 from pathlib import Path
 import sys
 from serial.tools import list_ports
-import json
+import os
 
 # from utils.character import Character
 # from utils.graph import Graph
@@ -20,7 +20,18 @@ from backend.maze_handler.graph import Graph
 # Global variables
 logic_gate_app = None
 maze_app = None
+morse_app = None
 start_time = None
+time_array = []
+# Morse code dictionary
+MORSE_CODE_DICT = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
+    'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
+    'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
+    'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+    'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--',
+    'Z': '--..'
+}
 words = [
     'APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY',
     'MANGO', 'PLUMS', 'OLIVE', 'PEARS', 'APRIC',
@@ -38,8 +49,8 @@ def make_arduino_connection(port, baudrate, simulation_mode=False):
         arduino_serial = serial.Serial(port, baudrate)
         time.sleep(2)  # Wait for the connection to establish
         return arduino_serial
-    except serial.SerialException:
-        print("Port not open. Testing.")
+    except serial.SerialException as e:
+        print(f"Port not open. Error: {e}")
         sys.exit()
 
 
@@ -52,17 +63,25 @@ def EngeeneringApp(parent):
     ports = get_serial_ports()
     port_selection_window = Toplevel(parent)
     port_selection_window.title("Select Serial Port")
-    port_selection_window.geometry("300x200")
-    port_selection_window.configure(bg="#FFFFFF")
+    port_selection_window.geometry("400x300")
+    port_selection_window.configure(bg="#F0F0F0")
+    port_selection_window.iconbitmap(relative_to_assets("minilogo.ico"))
+    
+    # Title label
+    title_label = Label(port_selection_window, text="Select Serial Port", font=("Montserrat Bold", 16), bg="#F0F0F0", fg="#C67FFC")
+    title_label.pack(pady=20)
+    
+    global start_time
+    start_time = time.time()
 
-    Label(port_selection_window, text="Select Serial Port", font=("Montserrat Bold", 14), bg="#FFFFFF").pack(pady=10)
-
+    # Serial port selection combobox
     serial_port = tk.StringVar()
     port_combobox = ttk.Combobox(port_selection_window, textvariable=serial_port, values=ports)
-    port_combobox.pack(pady=10)
+    port_combobox.pack(pady=10, padx=20)
     
+    # Simulation mode checkbutton
     simulation_mode = tk.BooleanVar()
-    simulation_checkbutton = tk.Checkbutton(port_selection_window, text="Simulation Mode", variable=simulation_mode, onvalue=True, offvalue=False, bg="#FFFFFF")
+    simulation_checkbutton = tk.Checkbutton(port_selection_window, text="Simulation Mode", variable=simulation_mode, onvalue=True, offvalue=False, bg="#F0F0F0", fg="#C67FFC", font=("Helvetica", 12))
     simulation_checkbutton.pack(pady=10)
 
     def on_port_selected():
@@ -70,60 +89,21 @@ def EngeeneringApp(parent):
             serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
         if serial_port.get():
             port_selection_window.destroy()
-            # logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
-            logic_gate_app = MazeApp(parent, serial_port.get())
+            logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
             logic_gate_app.mainloop()
+            # maze_app = MazeApp(parent, serial_port.get(), None,  simulation_mode.get())
+            # maze_app.mainloop()
+            # morse_app = MorseApp(parent, serial_port.get(), finish_callback,  None, simulation_mode.get())
+            # morse_app.mainloop()
         else:
             messagebox.showerror("Selection Error", "Please select a serial port.")
 
-    Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold')).pack(pady=10)
+    ok_button = Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'))
+    ok_button.pack(pady=20)
 
-def select_serial_port(parent):
-    ports = get_serial_ports()
-    port_selection_window = Toplevel(parent)
-    port_selection_window.title("Select Serial Port")
-    port_selection_window.geometry("300x200")
-    port_selection_window.configure(bg="#FFFFFF")
-
-    Label(port_selection_window, text="Select Serial Port", font=("Montserrat Bold", 14), bg="#FFFFFF").pack(pady=10)
-
-    serial_port = tk.StringVar()
-    port_combobox = ttk.Combobox(port_selection_window, textvariable=serial_port, values=ports)
-    port_combobox.pack(pady=10)
-
-    # Set the first port as the default selection
-    if ports:
-        port_combobox.current(0)
-        serial_port.set(ports[0])
-
-    simulation_mode = tk.BooleanVar()
-    simulation_checkbutton = tk.Checkbutton(port_selection_window, text="Simulation Mode", variable=simulation_mode, onvalue=True, offvalue=False, bg="#FFFFFF")
-    simulation_checkbutton.pack(pady=10)
-
-    def on_port_selected():
-        if simulation_mode.get():
-            serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
-        if serial_port.get():
-            port_selection_window.destroy()
-            parent.selected_serial_port = serial_port.get()
-            parent.simulation_mode = simulation_mode.get()
-        else:
-            messagebox.showerror("Selection Error", "Please select a serial port.")
-
-    Button(port_selection_window, text="OK", command=on_port_selected, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold')).pack(pady=10)
-    
-    parent.wait_window(port_selection_window)
 # Define the relative_to_assets function
 def relative_to_assets(path: str) -> Path:
     return Path(__file__).parent / "assets" / Path(path)
-
-# Function to simulate serial data from the Arduino
-def simulate_serial_data(arduino_serial):
-    time.sleep(1)
-    responses = ["Experiment 1 Start", "Gate 1 Completed", "Gate 2 Completed", "Gate 3 Completed", "Gate 4 Completed", "Experiment 1 Finish"]
-    for response in responses:
-        arduino_serial.write(response.encode())
-        time.sleep(1)
 
 class LogicGateApp(tk.Toplevel):
     def __init__(self, master, switch_to_maze_app, serial_port, simulation_mode=False):
@@ -134,6 +114,7 @@ class LogicGateApp(tk.Toplevel):
         self.serial_port = serial_port
         self.simulation_mode = simulation_mode
         self.arduino_serial = make_arduino_connection(self.serial_port, 9600, simulation_mode)
+        self.iconbitmap(relative_to_assets("minilogo.ico"))
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -184,61 +165,67 @@ class LogicGateApp(tk.Toplevel):
         e.widget['background'] = '#2196F3'
 
     def display_success_message(self):
-        messagebox.showinfo("Success", "Experiment 1 Finished")
+        self.output_text.config(state=tk.NORMAL)
+        self.output_text.insert(tk.END, "\nExperiment 1 Finish")
+        self.output_text.config(state=tk.DISABLED)
+
+        self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
 
     def send_command_and_wait_for_response(self, command, expected_response):
-        print(f"Sending command: {command}")
-        self.log_to_terminal(f"Sending command: {command}")
-        if self.simulation_mode:
-            print(f"Simulating response for command: {command}")
-            simulated_responses = {
-                '1': "Experiment 1 Start",
-                'NotGate': "Gate 1 Completed",
-                'OrGate': "Gate 2 Completed",
-                'AndGate': "Gate 3 Completed",
-                'NorGate': "Gate 4 Completed",
-            }
-            time.sleep(1)  # Simulate delay
-            response = simulated_responses.get(command, "")
-            self.log_to_terminal(f"Simulated response: {response}")
-        else:
-            self.arduino_serial.write(command.encode())
-            response = ""
-            while True:
-                if self.arduino_serial.inWaiting() > 0:
-                    time.sleep(1)  # Wait for the data to be available
-                    response = self.arduino_serial.readline().decode('utf-8').strip()
-                    print(f"Received response: {response}")
-                    self.log_to_terminal(f"Received response: {response}")
-                    if response == expected_response:
-                        break
-        return response
+        def task():
+            print(f"Sending command: {command}")
+            self.log_to_terminal(f"Sending command: {command}")
+            if self.simulation_mode:
+                print(f"Simulating response for command: {command}")
+                simulated_responses = {
+                    '1': "Experiment 1 Start",
+                    'NotGate': "Experiment 1 Finish",
+                }
+                time.sleep(1)  # Simulate delay
+                response = simulated_responses.get(command, "")
+                self.log_to_terminal(f"Simulated response: {response}")
+            else:
+                self.arduino_serial.write(command.encode())
+                response = ""
+                while True:
+                    if self.arduino_serial.inWaiting() > 0:
+                        time.sleep(1)  # Wait for the data to be available
+                        response = self.arduino_serial.readline().decode('utf-8').strip()
+                        print(f"Received response: {response}")
+                        self.log_to_terminal(f"Received response: {response}")
+                        if response == expected_response:
+                            break
+            return response
+
+        thread = Thread(target=task)
+        thread.start()
 
     def start_experiment_1(self):
         self.output_text.config(state=tk.NORMAL)
         self.output_text.delete('1.0', tk.END)
 
         gates = ['NotGate', 'OrGate', 'AndGate', 'NorGate', 'NandGate', 'XorGate', 'XnorGate']
-        selected_gates = random.sample(gates, 4)
+        selected_gate = random.sample(gates, 1)[0]
 
-        experiment_text = "\n".join([f"{gate}" for gate in selected_gates])
-        self.output_text.insert(tk.END, experiment_text)
+        self.output_text.insert(tk.END, f"Selected gate: {selected_gate}\n")
         self.output_text.config(state=tk.DISABLED)
 
         if not self.simulation_mode:
             self.arduino_serial.write(b'1')  # Send signal to Arduino to start experiment
-        self.send_experiment_command(selected_gates)
+        self.send_experiment_command(selected_gate)
 
-    def send_experiment_command(self, gates):
+    def send_experiment_command(self, gate):
         def send_and_wait(gate):
             command = gate
-            expected_response = f"Gate {gates.index(gate) + 1} Completed"
+            expected_response = "Experiment 1 Finish"
+            print(f"Sending command: {command}")
+            self.log_to_terminal(f"Sending command: {command}")
+            print(f"Waiting for response: {expected_response}")
             self.send_command_and_wait_for_response(command, expected_response)
             self.log_to_terminal(f"Sent: {command}")
             self.log_to_terminal(f"Waiting for: {expected_response}")
 
-        for gate in gates:
-            self.after(100, send_and_wait, gate)  # Delay to avoid blocking
+        self.after(100, send_and_wait, gate)  # Delay to avoid blocking
 
         self.monitor_serial_for_success()
 
@@ -251,6 +238,7 @@ class LogicGateApp(tk.Toplevel):
             else:
                 while True:
                     if self.arduino_serial.inWaiting() > 0:
+                        time.sleep(0.4)  # Add a small delay to ensure all incoming messages are read
                         my_data = self.arduino_serial.readline().decode('utf-8').strip()
                         self.log_to_terminal(my_data)
                         if "Experiment 1 Finish" in my_data:
@@ -268,13 +256,20 @@ class LogicGateApp(tk.Toplevel):
         self.read_serial_button.config(text="Start Experiment 2", command=self.start_experiment_2)
 
     def start_experiment_2(self):
-        self.switch_to_maze_app(self.serial_port)
+        global start_time
+        global time_array
+        time_array.append(time.time() - start_time)
+        start_time = time.time()
+        self.switch_to_maze_app(self, self.serial_port, self.arduino_serial, self.simulation_mode)
 
     def log_to_terminal(self, message):
-        self.terminal_text.config(state=tk.NORMAL)
-        self.terminal_text.insert(tk.END, message + '\n')
-        self.terminal_text.config(state=tk.DISABLED)
-        self.terminal_text.see(tk.END)
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
+
+        self.after(0, update_terminal)
 
     def show_help(self):
         help_window = Toplevel(self)
@@ -306,41 +301,71 @@ class LogicGateApp(tk.Toplevel):
         Label(help_window, text=help_text, font=("Montserrat", 14), fg="#171435", bg="#FFFFFF", justify=LEFT, wraplength=580).pack(pady=10, padx=20)
 
 class MazeApp(tk.Toplevel):
-    def __init__(self, master, serial_port):
+    def __init__(self, master, serial_port, arduino_serial=None, simulation_mode=False):
         super().__init__(master)
         self.title("Maze Challenge")
         self.geometry("800x600")
+        self.iconbitmap(relative_to_assets("minilogo.ico"))
 
-        self.serial_port = serial_port if serial_port else master.selected_serial_port
+        self.serial_port = serial_port
+        self.simulation_mode = simulation_mode
+        print(f"Selected serial port: {self.serial_port}")
+        if arduino_serial is None:
+            self.arduino_serial = make_arduino_connection(self.serial_port, 9600, simulation_mode)
+        else:
+            self.arduino_serial = arduino_serial
 
-        if not self.serial_port:
-            messagebox.showerror("Error", "No serial port selected.")
-            self.destroy()
-            return
-        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
-
-        self.grid_size = 10
-        self.side_length = 10
+        self.grid_size = 5
+        self.side_length = 5
         self.mode = 0  # Solo mode
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        self.start_button = tk.Button(self, text="Start Experiment 2", command=self.start_maze_game, bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'), activebackground='#45a049', bd=0, padx=10, pady=5)
-        self.start_button.place(x=400, y=550)
-        self.start_button.bind("<Enter>", self.on_enter)
-        self.start_button.bind("<Leave>", self.on_leave)
+        self.create_widgets()
 
         self.pause_event = Event()
         self.pause_event.set()
 
-    def switch_to_morse_app(self, serial_port):
-        self.destroy()
-        morse_app = MorseApp(self.master, serial_port, self.finish_challenge)
+        if self.simulation_mode:
+            self.bind_all("<Key>", self.simulate_keypress)
+        
+    def create_widgets(self):
+        self.terminal_text = Text(self, height=10, width=80, state=DISABLED)
+        self.canvas.create_window(400, 400, window=self.terminal_text)
+
+        self.start_button = tk.Button(self, text="Start Experiment 2", command=self.start_maze_game,
+                                      bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
+                                      activebackground='#45a049', bd=0, padx=10, pady=5)
+        self.start_button.place(x=320, y=550)
+        self.start_button.bind("<Enter>", self.on_enter)
+        self.start_button.bind("<Leave>", self.on_leave)
+
+    def log_to_terminal(self, message):
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
+
+        self.after(0, update_terminal)
+
+    def switch_to_morse_app(self, serial_port, arduino_serial, simulation_mode=False):
+        global maze_app
+        if maze_app is not None:
+            maze_app.destroy()
+            maze_app = None  # Ensure reference is cleared
+        global start_time
+        global time_array
+        time_array.append(time.time() - start_time)
+        start_time = time.time()
+        global morse_app
+        morse_app = MorseApp(self.master, serial_port, finish_callback, arduino_serial, simulation_mode)
         morse_app.mainloop()
 
     def start_experiment_2(self):
-        self.arduino_serial.write(b'2')  
+        if not self.simulation_mode:
+            self.arduino_serial.write(b'2')  
 
     def on_enter(self, e):
         e.widget['background'] = '#45a049'
@@ -356,6 +381,31 @@ class MazeApp(tk.Toplevel):
     def run_maze_game(self):
         # Run Pygame in a separate thread
         Thread(target=self.run_pygame_maze_game, daemon=True).start()
+
+    def handle_key_press(self, event, player, vertices, maze):
+        move = None
+        current_point = player.get_current_position()
+        next_point = None
+
+        if event.key == pygame.K_RIGHT and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
+            move = "Right"
+            next_point = (current_point[0] + 1, current_point[1])
+        elif event.key == pygame.K_LEFT and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
+            move = "Left"
+            next_point = (current_point[0] - 1, current_point[1])
+        elif event.key == pygame.K_UP and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
+            move = "Up"
+            next_point = (current_point[0], current_point[1] - 1)
+        elif event.key == pygame.K_DOWN and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
+            move = "Down"
+            next_point = (current_point[0], current_point[1] + 1)
+
+        if next_point:
+            player.move_character(next_point)
+            self.log_to_terminal(f"Move: {move}")
+            if player.reached_goal():
+                print("Maze completed")
+                self.switch_to_morse_app(self.serial_port, self.arduino_serial, self.simulation_mode)
 
     def run_pygame_maze_game(self):
         import os
@@ -445,56 +495,82 @@ class MazeApp(tk.Toplevel):
             draw_position(screen, scaled_side_length, scaled_border_width, end_point, RED)
             pygame.display.flip()
             carryOn = True
+
             while carryOn:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        self.arduino_serial.write(b'Experiment 2 Finish') 
                         carryOn = False
-                if self.arduino_serial.in_waiting > 0:
-                    receivedMessage = self.arduino_serial.readline().decode().strip()
-                    current_point = player.get_current_position()
-                    next_point = None
-                    if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
-                        next_point = (current_point[0] + 1, current_point[1])
-                    elif receivedMessage == "Left" and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
-                        next_point = (current_point[0] - 1, current_point[1])
-                    elif receivedMessage == "Up" and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
-                        next_point = (current_point[0], current_point[1] - 1)
-                    elif receivedMessage == "Down" and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
-                        next_point = (current_point[0], current_point[1] + 1)
-                    if next_point:
-                        player.move_character(next_point)
-                    if player.reached_goal():
-                        carryOn = False
-                        self.switch_to_morse_app(self.serial_port)
+                    elif self.simulation_mode and event.type == pygame.KEYDOWN:
+                        self.handle_key_press(event, player, vertices, maze)
+                    elif not self.simulation_mode and self.arduino_serial.in_waiting > 0:
+                        receivedMessage = self.arduino_serial.readline().decode().strip()
+                        self.log_to_terminal(receivedMessage)  # Log received message to terminal
+                        current_point = player.get_current_position()
+                        next_point = None
+                        if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
+                            next_point = (current_point[0] + 1, current_point[1])
+                        elif receivedMessage == "Left" and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
+                            next_point = (current_point[0] - 1, current_point[1])
+                        elif receivedMessage == "Up" and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
+                            next_point = (current_point[0], current_point[1] - 1)
+                        elif receivedMessage == "Down" and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
+                            next_point = (current_point[0], current_point[1] + 1)
+                        if next_point:
+                            player.move_character(next_point)
+                        if player.reached_goal():
+                            carryOn = False
+                            print("Maze completed")
+                            self.arduino_serial.write(b'Experiment 2 Finish')
+                            time.sleep(2)
+                            self.switch_to_morse_app(self.serial_port, self.arduino_serial, self.simulation_mode)
+
                 pygame.display.update()
             pygame.quit()
 
         runGame(self.grid_size, self.side_length)
 
+    def simulate_keypress(self, event):
+        key = event.keysym
+        message_map = {
+            'Right': 'Right',
+            'Left': 'Left',
+            'Up': 'Up',
+            'Down': 'Down'
+        }
+        if key in message_map:
+            message = message_map[key]
+            self.log_to_terminal(f"Simulated {message} keypress")
+            self.arduino_serial.write(message.encode())
 
 class MorseApp(tk.Toplevel):
-    def __init__(self, master, serial_port, finish_callback):
+    def __init__(self, master, serial_port, finish_callback, arduino_serial=None, simulation_mode=False):
         super().__init__(master)
         self.title("Morse App")
         self.geometry("800x600")
         self.serial_port = serial_port
-        self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
-        self.finish_callback = finish_callback
+        self.simulation_mode = simulation_mode
+        self.iconbitmap(relative_to_assets("minilogo.ico"))
+        print(f"Selected serial port: {self.serial_port}")
+        if arduino_serial is None:
+            self.arduino_serial = make_arduino_connection(self.serial_port, 9600, simulation_mode)
+        else:
+            self.arduino_serial = arduino_serial
+        self.finish_callback = lambda: finish_callback(master, self)  # Adjust callback to pass master and self
 
         self.canvas = Canvas(self, bg="#FFFFFF", width=800, height=600)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.create_widgets()
-        global start_time
-        self.start_time = time.time()
 
     def create_widgets(self):
-        self.output_text = Text(self, height=10, width=30, state=tk.DISABLED)
+        self.output_text = Text(self, height=10, width=30, state=DISABLED)
         self.canvas.create_window(600, 170, window=self.output_text)
 
-        self.terminal_text = Text(self, height=10, width=80, state=tk.DISABLED)
+        self.terminal_text = Text(self, height=10, width=80, state=DISABLED)
         self.canvas.create_window(400, 400, window=self.terminal_text)
+
+        self.morse_text = Text(self, height=10, width=30, state=DISABLED)
+        self.canvas.create_window(200, 170, window=self.morse_text)
 
         self.read_serial_button = tk.Button(self, text="Start Experiment 3", command=self.start_experiment_3,
                                             bg='#4CAF50', fg='white', font=('Helvetica', 12, 'bold'),
@@ -518,71 +594,146 @@ class MorseApp(tk.Toplevel):
         self.output_text.config(state=tk.DISABLED)
 
         self.send_experiment_command(word)
-        self.monitor_serial_for_success()
+        self.display_morse_code(word)
+        self.monitor_serial_for_success(word)
 
     def select_random_word(self):
-            with open('words.json', 'r') as f:
-                words = json.load(f)
-            selected_word = random.choice(words)
-            print(f"Selected word for decoding: {selected_word}")
-            return selected_word
-    
+        selected_word = random.choice(words)
+        print(f"Selected word for decoding: {selected_word}")
+        return selected_word
+
     def send_experiment_command(self, word):
-        command = "3\n"
-        self.arduino_serial.write(command.encode())
-        self.log_to_terminal("Experiment 3 Start")
-        time.sleep(5)  # Wait for the connection to establish
+        if self.simulation_mode:
+            self.log_to_terminal("Experiment 3 Start")
+            time.sleep(1)  # Simulate delay
+            self.log_to_terminal(f"Sent word: {word}")
+        else:
+            self.arduino_serial.write(b'3')  # Send '3' to start
+            self.log_to_terminal("Experiment 3 Start")
+            time.sleep(5)  # Wait for the connection to establish
 
-        self.arduino_serial.write(word.encode())
-        self.log_to_terminal(f"Sent word: {word}")
+            self.arduino_serial.write(word.encode())  # Send the selected word
+            self.log_to_terminal(f"Sent word: {word}")
 
-    def monitor_serial_for_success(self):
-        def read_serial():
-            while True:
-                if self.arduino_serial.in_waiting > 0:
-                    my_data = self.arduino_serial.readline().decode('utf-8').strip()
-                    self.log_to_terminal(my_data)
-                    if "Experiment 3 Finish" in my_data:
-                        self.display_success_message()
-                        break
+    def display_morse_code(self, word):
+        self.morse_text.config(state=tk.NORMAL)
+        self.morse_text.delete('1.0', tk.END)
+        for letter in word:
+            morse_code = MORSE_CODE_DICT.get(letter.upper(), '')
+            self.morse_text.insert(tk.END, f"{letter}: {morse_code}\n")
+        self.morse_text.config(state=tk.DISABLED)
 
-        self.serial_thread = Thread(target=read_serial, daemon=True)
-        self.serial_thread.start()
+    def monitor_serial_for_success(self, word):
+        if self.simulation_mode:
+            Thread(target=self.simulate_serial_data, args=(word,), daemon=True).start()
+        else:
+            def read_serial():
+                while True:
+                    if self.arduino_serial.in_waiting > 0:
+                        my_data = self.arduino_serial.readline().decode('utf-8').strip()
+                        self.log_to_terminal(my_data)
+                        if "Experiment 3 Finish" in my_data:
+                            self.display_success_message()
+                            break
+
+            self.serial_thread = Thread(target=read_serial, daemon=True)
+            self.serial_thread.start()
+
+    def simulate_serial_data(self, word):
+        for letter in word:
+            morse_code = MORSE_CODE_DICT.get(letter.upper(), '')
+            self.log_to_terminal(f"{letter}: {morse_code}")
+            time.sleep(1)  # Simulate delay for each letter
+        time.sleep(2)  # Simulate some additional delay
+        self.log_to_terminal("Experiment 3 Finish")
+        self.display_success_message()
 
     def display_success_message(self):
         self.output_text.config(state=tk.NORMAL)
         self.output_text.insert(tk.END, "\nExperiment 3 Finish")
         self.output_text.config(state=tk.DISABLED)
+        
+        global start_time
+        global time_array
+        time_array.append(time.time() - start_time)
+
         self.finish_callback()
 
     def log_to_terminal(self, message):
-        self.terminal_text.config(state=tk.NORMAL)
-        self.terminal_text.insert(tk.END, message + '\n')
-        self.terminal_text.config(state=tk.DISABLED)
-        self.terminal_text.see(tk.END)
+        def update_terminal():
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, message + '\n')
+            self.terminal_text.config(state=tk.DISABLED)
+            self.terminal_text.see(tk.END)
 
-def switch_to_maze_app(parent, serial_port):
-    logic_gate_app.destroy()
+        self.after(0, update_terminal)
+
+
+
+def switch_to_maze_app(parent, serial_port, arduino_serial, simulation_mode=False):
+    global logic_gate_app
+    if logic_gate_app is not None:
+        logic_gate_app.destroy()
+        logic_gate_app = None  # Ensure reference is cleared
     global maze_app
-    maze_app = MazeApp(parent, serial_port)
+    maze_app = MazeApp(parent, serial_port, arduino_serial, simulation_mode)
     maze_app.mainloop()
 
-def switch_to_morse_app(parent, serial_port):
-    maze_app.destroy()
-    global morse_app
-    morse_app = MorseApp(parent, serial_port, finish_callback)
-    morse_app.mainloop()
 
 
-def finish_callback():
-    global start_time
-    end_time = time.time()
-    duration = end_time - start_time
+def finish_callback(root, morse_app):
+    print("Experiment 3 Finish. Showing Results...")
+    duration = 0
+    global time_array
+    for i in range(len(time_array)):
+        print(f"Time taken for experiment {i+1}: {time_array[i]:.2f} seconds")
+        duration +=  time_array[i]
     print(f"Total time taken for the whole process: {duration:.2f} seconds")
-    name = simpledialog.askstring("Input", "Enter your team name:")
-    if name:
-        with open("results.txt", "a") as file:
-            file.write(f"Team: {name}, Time: {duration} seconds\n")
+
+    def save_results():
+        # Function to show the dialog and save results
+        def show_dialog_and_save():
+            name = simpledialog.askstring("Input", "Enter your team name:", parent=root)
+            if name:
+                # Read the existing contents of the leaderboard file
+                leaderboard_path = os.path.join("src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data", "leaderboard.txt")
+                if os.path.exists(leaderboard_path):
+                    with open(leaderboard_path, "r") as file:
+                        lines = file.readlines()
+                else:
+                    lines = []
+
+                # Create the new entry
+                new_entry = f"Team {name}, " + ", ".join(f"{int(t // 60):02}:{int(t % 60):02}" for t in time_array) + " end\n"
+
+                # Append the new entry to the lines
+                lines.append(new_entry)
+
+                # Write the updated contents back to the leaderboard file
+                with open(leaderboard_path, "w") as file:
+                    file.writelines(lines)
+
+                result_window = tk.Toplevel(root)
+                result_window.title("Results")
+                result_window.geometry("300x200")
+
+                result_label = tk.Label(result_window, text=f"Team {name}\nDuration: {duration:.2f} seconds")
+                result_label.pack(pady=20)
+
+                def on_ok():
+                    result_window.destroy()
+                    morse_app.destroy()
+
+                ok_button = tk.Button(result_window, text="OK", command=on_ok)
+                ok_button.pack(pady=20)
+
+        # Use the `after` method to call the dialog function on the main thread
+        root.after(0, show_dialog_and_save)
+
+    # Call the save_results function to schedule the dialog display
+    save_results()
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()

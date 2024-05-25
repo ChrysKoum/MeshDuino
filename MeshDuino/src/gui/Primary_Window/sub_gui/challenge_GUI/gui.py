@@ -58,9 +58,9 @@ def Challenge(parent):
     canvas.place(x = 230, y = 72)
 
 
-    #engeenering
+    #engineering
     global challange_coding_button_image
-    challange_coding_button_image = PhotoImage(file=relative_to_assets("image_coding.png"))
+    challange_coding_button_image = PhotoImage(file=relative_to_assets("image_engineering.png"))
     Button(
         image=challange_coding_button_image,
         borderwidth=0,
@@ -74,32 +74,39 @@ def Challenge(parent):
 
 
 
-    #physics
-    global challange_lofi_button_image
-    challange_lofi_button_image = PhotoImage(file=relative_to_assets("image_lofi.png"))
-    Button(
-        image=challange_lofi_button_image,
+    # Physics Button
+    global challange_physics_button_image
+    challange_physics_button_image = PhotoImage(file=relative_to_assets("image_physics.png"))
+    physics_button = Button(
+        image=challange_physics_button_image,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: threading.Thread(args=("lofi",parent),daemon=True).start(),
+        command=lambda: threading.Thread(args=("lofi", parent), daemon=True).start(),
         relief="flat",
         activebackground="#FFFFFF",
         activeforeground="#FFFFFF"
-        ).place(x=468, y=140, width=117, height=112)
+    )
+    physics_button.place(x=468, y=140, width=117, height=112)
+    physics_button.bind("<Enter>", lambda e: physics_button.config(cursor="X_cursor"))
+    physics_button.bind("<Leave>", lambda e: physics_button.config(cursor=""))
 
 
-    #Sounds
+     # Sounds Button
     global challange_bass_button_image
-    challange_bass_button_image = PhotoImage(file=relative_to_assets("image_bass.png"))
-    Button(
+    challange_bass_button_image = PhotoImage(file=relative_to_assets("image_sounds.png"))
+    sounds_button = Button(
         image=challange_bass_button_image,
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: threading.Thread( args=("Sounds",parent),daemon=True).start(),
+        command=lambda: threading.Thread(args=("Sounds", parent), daemon=True).start(),
         relief="flat",
         activebackground="#FFFFFF",
         activeforeground="#FFFFFF"
-        ).place(x=643, y=140, width=117, height=112)
+    )
+    sounds_button.place(x=643, y=140, width=117, height=112)
+    sounds_button.bind("<Enter>", lambda e: sounds_button.config(cursor="X_cursor"))
+    sounds_button.bind("<Leave>", lambda e: sounds_button.config(cursor=""))
+
 
     
 

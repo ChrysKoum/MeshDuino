@@ -41,7 +41,8 @@ def startup():
                 window.withdraw()
                 handling_label = "Update"
         else:
-            canvas.itemconfig(display_text, text=" Please login to continue...", font=("Montserrat Bold", 20))
+            canvas.coords(display_text, 19.0, 283.0)  # Change coordinates here
+            canvas.itemconfig(display_text,text=" Please login to continue...")
             time.sleep(3)
             window.withdraw()
             handling_label = "Login"
@@ -71,7 +72,7 @@ def startup():
     logo_img = PhotoImage(file=relative_to_assets("Arduino_logo_transperant_v3_smaller.png"))
     canvas.create_image(170, 150, image=logo_img)
 
-    display_text = canvas.create_text(18.0, 283.0, anchor="nw", text="Checking For Updates...", fill="#FFFFFF", font=("Montserrat Bold", 26 * -1))
+    display_text = canvas.create_text(30.0, 283.0, anchor="nw", text="Checking For Updates...", fill="#FFFFFF", font=("Montserrat Bold", 26 * -1))
 
     window.after(500, handle_process_thread)
     window.mainloop()

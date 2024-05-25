@@ -107,7 +107,7 @@ void setup() {
 void loop() {
   String start_message = receiveMessage();
 
-  if (start_message == "Experiment 1 Start") {
+  if (start_message == "e1s") {
     while (true) {
       String receivedMessage = receiveMessage();
 
@@ -116,33 +116,25 @@ void loop() {
         digitalWrite(i, LOW);
       }
 
-      if (receivedMessage == "OrGate") {
+      if (receivedMessage == "o") { // Or Gate
         digitalWrite(OrGate, HIGH);
         checkConditions(orConditions, 4);
-         digitalWrite(OrGate,LOW);
-
-      } else if (receivedMessage == "AndGate") {
+      } else if (receivedMessage == "a") { // And Gate
         digitalWrite(AndGate, HIGH);
         checkConditions(andConditions, 4);
-        digitalWrite(AndGate,LOW);
-      } else if (receivedMessage == "NorGate") {
+      } else if (receivedMessage == "no") { // Nor Gate
         digitalWrite(NorGate, HIGH);
         checkConditions(norConditions, 4);
-         digitalWrite(NorGate,LOW);
-
-      } else if (receivedMessage == "NandGate") {
+      } else if (receivedMessage == "na") { // Nand Gate
         digitalWrite(NandGate, HIGH);
         checkConditions(nandConditions, 4);
-        digitalWrite(NandGate,LOW);
-      } else if (receivedMessage == "XorGate") {
+      } else if (receivedMessage == "xo") { // Xor Gate
         digitalWrite(XorGate, HIGH);
         checkConditions(xorConditions, 4);
-         digitalWrite(XorGate,LOW);
-      } else if (receivedMessage == "XnorGate") {
+      } else if (receivedMessage == "xn") { // Xnor Gate
         digitalWrite(XnorGate, HIGH);
         checkConditions(xnorConditions, 4);
-         digitalWrite(XnorGate,LOW);
-      } else if (receivedMessage == "NotGate") {
+      } else if (receivedMessage == "n") { // Not Gate
         digitalWrite(NotGate, HIGH);
         checkNotConditions(notConditions, 2);
          digitalWrite(NotGate,LOW);
@@ -151,7 +143,7 @@ void loop() {
       if (cnt2 == 1) {
         Serial.println("Finished");
         delay(1000);
-        sendMessage("Experiment 1 Finish");
+        sendMessage("f");
         delay(2000);
         while (true) {
           Serial.println("ended");
@@ -191,8 +183,7 @@ void checkConditions(bool conditions[][3], int size) {
         delay(1500);
         digitalWrite(OutputLedPin,LOW);
         Serial.println("Success");
-        sendMessage("Success");
-         
+        sendMessage("s");
 
          break;
         
@@ -200,14 +191,9 @@ void checkConditions(bool conditions[][3], int size) {
     }
 
   }
-
-    while (true) {
-      delay(1000);
-      
-      sendMessage("Success Gate");
-      delay(1000);
-      break;
-    }
+    delay(1000);
+    sendMessage("sg");
+    delay(1000);
 
   }
 
@@ -233,21 +219,15 @@ void checkNotConditions(bool conditions[][2], int size) {
         digitalWrite(OutputLedPin, conditions[i][1]);
         delay(1000);
         Serial.println("Success");
-        String comb_sent = "Combinational Gate " + String(i) + " is Completed"; 
-        sendMessage(comb_sent.c_str());
+        sendMessage("s");
         cnt++;
       }
     }
   }
 
-  if (cnt == size) {
-    while (true) {
-      delay(1000);
-      sendMessage("Success Gate");
-      delay(1000);
-      break;
-    }
-  }
+  delay(1000);
+  sendMessage("sg");
+  delay(1000);
 }
 
 void sendMessage(const char *message) {

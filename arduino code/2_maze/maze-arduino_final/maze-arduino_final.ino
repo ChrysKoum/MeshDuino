@@ -14,8 +14,8 @@ const int PHOTO_RESISTOR2_PIN=A1;
 const int PHOTO_RESISTOR1_PIN=A0;
 const int TRIG_PIN_RIGHT=7;
 const int ECHO_PIN_RIGHT=6;
-const int TRIG_PIN_LEFT=10;
-const int ECHO_PIN_LEFT=9;
+const int TRIG_PIN_LEFT=5;
+const int ECHO_PIN_LEFT=4;
 int number_of_bytes=0;
 
 float duration_right,duration_left,distance_right,distance_left;
@@ -66,7 +66,7 @@ void loop() {
  String receivedMessage = receiveMessage();
 
 
-  if(receivedMessage=="Experiment 2 Start")
+  if(receivedMessage=="e2s")
 {
 while(true)
 {
@@ -101,49 +101,54 @@ while(true)
   lightValue1 = analogRead(PHOTO_RESISTOR1_PIN);
   lightValue2 = analogRead(PHOTO_RESISTOR2_PIN);
 
-  bool k=false;
 
+
+String   finishMessage = receiveMessage();
+
+   if(finishMessage=="e2f")
+        {  Serial.println("Experiment 2 Finish");
+          while(true){
+
+
+
+          }
+        } 
  
 
 if (distance_right < 10) {
     // Move right
     Serial.println("Moving Right");
     Serial.print(distance_right);
-    sendMessage("Right");
+    sendMessage("r");
     delay(1500);
   } else if (distance_left < 10) {
     // Move left
     Serial.println("Moving Left");
     Serial.print(distance_left);
-    sendMessage("Left");
+    sendMessage("l");
     delay(1500);
-  } else if (lightValue2 < 400) {
+  } else if (lightValue2 < 150) {
     // Move down
     Serial.println("Moving Down");
-    sendMessage("Down");
+    sendMessage("d");
     Serial.println(lightValue2);
     delay(1500);
-  } else if (lightValue1 < 400) {
+  } else if (lightValue1 < 150) {
     // Move up
     Serial.println("Moving Up");
-    sendMessage("Up");
+    sendMessage("u");
     Serial.println(lightValue1);
     delay(1500);
   } else {
     // If none of the conditions are met
     Serial.println("No move");
-    sendMessage("No move");
+    sendMessage("n");
     // Add your code for no movement here
     delay(1500);
   }
   
   
-  receivedMessage = receiveMessage();
 
-   if(receivedMessage=="Experiment 2 Finish")
-        { 
-          break;
-        } 
 
 }//end if
 
@@ -173,7 +178,7 @@ void sendMessage(const char* message) {
     Serial.println("Attempting to send the movement...");
 
     bool success = false;
-    for (int attempt = 0; attempt < 5; attempt++) {  // Retry up to 3 times
+    for (int attempt = 0; attempt < 3; attempt++) {  // Retry up to 3 times
         Serial.print("Attempt ");
         Serial.println(attempt + 1);
         if (rf22.sendtoWait(data_send, strlen(message),DESTINATION_ADDRESS_1) == RF22_ROUTER_ERROR_NONE) {
@@ -184,13 +189,21 @@ void sendMessage(const char* message) {
             Serial.println(number_of_bytes);//
             break;
         } else {
-            Serial.println("sendtoWait failed");
+                   
+              Serial.println("sendtoWait failed");
         }
         delay(1000); // Wait 1 second before retrying
     }
-
+            
     if (!success) {
         Serial.println("Failed to send finish message after 3 attempts.");
+        Serial.println("Experiment 2 Finish");
+        
+        while(true){
+          
+        
+
+        }
     }
 
 
