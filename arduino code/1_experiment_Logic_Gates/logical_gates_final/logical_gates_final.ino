@@ -119,21 +119,27 @@ void loop() {
       if (receivedMessage == "o") { // Or Gate
         digitalWrite(OrGate, HIGH);
         checkConditions(orConditions, 4);
+        digitalWrite(OrGate,LOW);
       } else if (receivedMessage == "a") { // And Gate
         digitalWrite(AndGate, HIGH);
         checkConditions(andConditions, 4);
+         digitalWrite(AndGate,LOW);
       } else if (receivedMessage == "no") { // Nor Gate
         digitalWrite(NorGate, HIGH);
         checkConditions(norConditions, 4);
+         digitalWrite(NorGate, LOW);
       } else if (receivedMessage == "na") { // Nand Gate
         digitalWrite(NandGate, HIGH);
         checkConditions(nandConditions, 4);
+         digitalWrite(NandGate, LOW);
       } else if (receivedMessage == "xo") { // Xor Gate
         digitalWrite(XorGate, HIGH);
         checkConditions(xorConditions, 4);
+        digitalWrite(XorGate,LOW);
       } else if (receivedMessage == "xn") { // Xnor Gate
         digitalWrite(XnorGate, HIGH);
         checkConditions(xnorConditions, 4);
+         digitalWrite(XnorGate,LOW);
       } else if (receivedMessage == "n") { // Not Gate
         digitalWrite(NotGate, HIGH);
         checkNotConditions(notConditions, 2);
