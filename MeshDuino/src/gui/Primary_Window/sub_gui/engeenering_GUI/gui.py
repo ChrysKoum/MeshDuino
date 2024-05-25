@@ -315,8 +315,8 @@ class MazeApp(tk.Toplevel):
         else:
             self.arduino_serial = arduino_serial
 
-        self.grid_size = 5
-        self.side_length = 5
+        self.grid_size = 7
+        self.side_length = 7
         self.mode = 0  # Solo mode
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", width=800, height=600)
@@ -687,7 +687,7 @@ def finish_callback(root, morse_app):
     global time_array
     for i in range(len(time_array)):
         print(f"Time taken for experiment {i+1}: {time_array[i]:.2f} seconds")
-        duration +=  time_array[i]
+        duration += time_array[i]
     print(f"Total time taken for the whole process: {duration:.2f} seconds")
 
     def save_results():
@@ -695,8 +695,27 @@ def finish_callback(root, morse_app):
         def show_dialog_and_save():
             name = simpledialog.askstring("Input", "Enter your team name:", parent=root)
             if name:
+                # List of possible base directories
+                base_dirs = [
+                    os.path.join("src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data"),
+                    os.path.join("MeshDuino", "src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data"),
+                    os.path.join("4_Arduino-STEM-Project", "MeshDuino", "src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data"),
+                    # Add more paths as necessary
+                ]
+                
+                # Find the first existing leaderboard path
+                leaderboard_path = None
+                for base_dir in base_dirs:
+                    potential_path = os.path.join(base_dir, "leaderboard.txt")
+                    if os.path.exists(potential_path):
+                        leaderboard_path = potential_path
+                        break
+
+                if leaderboard_path is None:
+                    # If no path found, set a default path
+                    leaderboard_path = os.path.join("src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data", "leaderboard.txt")
+
                 # Read the existing contents of the leaderboard file
-                leaderboard_path = os.path.join("src", "gui", "Primary_Window", "sub_gui", "leaderboard_GUI", "data", "leaderboard.txt")
                 if os.path.exists(leaderboard_path):
                     with open(leaderboard_path, "r") as file:
                         lines = file.readlines()

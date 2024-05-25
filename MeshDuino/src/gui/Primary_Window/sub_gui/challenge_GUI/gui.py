@@ -110,7 +110,7 @@ def Challenge(parent):
 
     
 
-    #Add leaderboard
+    #New Challenge
     '''round_rectangle(52,267,170,375,fill="#171435",outline="")'''
     global challange_add_button_image
     challange_add_button_image = PhotoImage(file=relative_to_assets("image_2.png"))
