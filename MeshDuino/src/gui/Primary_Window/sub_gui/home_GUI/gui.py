@@ -1,6 +1,7 @@
 from tkinter import PhotoImage, Canvas, Entry, Button, Toplevel, Label, messagebox, Tk, LEFT
 import threading
 from pathlib import Path
+from PIL import Image, ImageTk  # Import Pillow
 
 # Define the relative_to_assets function
 def relative_to_assets(path: str) -> Path:
@@ -8,6 +9,7 @@ def relative_to_assets(path: str) -> Path:
 
 # Define the Home function
 def Home(parent):
+    global arduino_img  # Make the variable global
     canvas = Canvas(
         parent,
         bg="#FFFFFF",
@@ -20,9 +22,8 @@ def Home(parent):
 
     canvas.place(x=230, y=72)
 
-
     canvas.create_text(
-        90.0,
+        150.0,
         58.0,
         anchor="nw",
         text="Welcome to Meshduino!",
@@ -30,13 +31,20 @@ def Home(parent):
         font=("Montserrat Bold", 32 * -1)
     )
     canvas.create_text(
-        115.0,
+        150.0,
         100.0,
         anchor="nw",
         text="An Integrated Arduino and Python Network",
         fill="#C67FFC",
         font=("Montserrat Bold", 18 * -1)
     )
+    
+    # Adding Arduino image
+    arduino_image_path = relative_to_assets("arduino_uno_1.png")
+    arduino_img = Image.open(arduino_image_path)
+    arduino_img = arduino_img.resize((200, 200), Image.ANTIALIAS)  # Resize the image
+    arduino_img = ImageTk.PhotoImage(arduino_img)
+    canvas.create_image(200, 150, image=arduino_img, anchor="nw")
 
     # Help button
     global help_button_image
@@ -61,6 +69,7 @@ def show_help():
     help_window.title("Help")
     help_window.geometry("700x500")
     help_window.configure(bg="#FFFFFF")
+    help_window.iconbitmap(relative_to_assets("minilogo.ico"))
 
     Label(
         help_window,
@@ -73,7 +82,8 @@ def show_help():
     help_text = """
     Welcome to Meshduino!
 
-    Meshduino is an Arduino network integrated with Python, featuring a GUI.
+    Meshduino is an Arduino network integrated with Python, 
+    featuring a GUI.
 
     Sections:
     - Home: Introduction to Meshduino and its features.
