@@ -98,7 +98,7 @@ void loop() {
     // Check for received message
     String receivedMessage = receiveMessage();
 
-    if (receivedMessage == "Experiment 3 Start") {
+    if (receivedMessage == "es3") {
         
 
         // Wait for the word to decode
