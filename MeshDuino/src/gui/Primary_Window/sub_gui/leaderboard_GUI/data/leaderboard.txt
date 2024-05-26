@@ -4,3 +4,5 @@ Team Charlie, 04:50, 05:10, 04:40 end
 Team FBI, 00:07, 00:08, 00:12 end
 Team OP, 00:06, 00:06, 00:10 end
 Team Ttttt, 00:04, 00:53, 00:13 end
+Team FIRE, 00:06, 00:08, 00:10 end
+Team BEST, 00:04, 00:06, 00:09 end
