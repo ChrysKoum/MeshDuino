@@ -17,6 +17,10 @@ import os
 from backend.maze_handler.character import Character
 from backend.maze_handler.graph import Graph
 
+# Firebase
+import firebase_admin
+from firebase_admin import credentials, db
+
 # Global variables
 logic_gate_app = None
 maze_app = None

@@ -21,6 +21,17 @@ from backend.maze_handler.graph import Graph
 import firebase_admin
 from firebase_admin import credentials, db
 
+# Path to your service account key file
+service_account_path = os.path.join(
+    os.path.dirname(__file__), 'serviceAccountKey.json'
+)
+
+# Initialize the app with a service account, granting admin privileges
+cred = credentials.Certificate(service_account_path)
+firebase_admin.initialize_app(cred, {
+    'databaseURL': "https://meshduino-6af30-default-rtdb.europe-west1.firebasedatabase.app"
+})
+
 # Global variables
 logic_gate_app = None
 maze_app = None

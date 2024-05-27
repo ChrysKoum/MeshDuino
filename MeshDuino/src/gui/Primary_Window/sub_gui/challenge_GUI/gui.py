@@ -4,7 +4,7 @@ from pathlib import Path
 # Explicit imports to satisfy Flake8
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, messagebox
 import threading
-from gui.Primary_Window.sub_gui.engeenering_GUI.gui import EngeeneringApp
+from gui.Primary_Window.sub_gui.engeenering_GUI.gui_firebase import EngeeneringApp
 
 
 

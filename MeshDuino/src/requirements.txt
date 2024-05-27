@@ -1,3 +1,4 @@
 pillow
 pygame
 pyserial
+firebase-admin
