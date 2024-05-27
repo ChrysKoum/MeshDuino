@@ -5,12 +5,13 @@ from tkinter import ttk
 import os
 import firebase_admin
 from firebase_admin import credentials, db
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
-# Path to your service account key file
-service_account_path = os.path.join(
-    os.path.dirname(__file__), 'serviceAccountKey.json'
-)
+# Path to your service account key file from environment variable
+service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 # Initialize the app with a service account, granting admin privileges
 cred = credentials.Certificate(service_account_path)

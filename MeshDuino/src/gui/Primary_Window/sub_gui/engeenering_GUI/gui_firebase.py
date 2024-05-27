@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 from serial.tools import list_ports
 import os
+from dotenv import load_dotenv
 
 # from utils.character import Character
 # from utils.graph import Graph
@@ -20,11 +21,11 @@ from backend.maze_handler.graph import Graph
 # Firebase
 import firebase_admin
 from firebase_admin import credentials, db
+# Load environment variables from .env file
+load_dotenv()
 
-# Path to your service account key file
-service_account_path = os.path.join(
-    os.path.dirname(__file__), 'serviceAccountKey.json'
-)
+# Path to your service account key file from environment variable
+service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 # Initialize the app with a service account, granting admin privileges
 cred = credentials.Certificate(service_account_path)
