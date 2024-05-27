@@ -102,7 +102,7 @@ void loop() {
         String finish_message=receiveMessage();
        
        
-        if(finish_message == "f")
+        if(finish_message == "e1f")
               {   
                 
                  Serial.println("Experiment 1 Finish");

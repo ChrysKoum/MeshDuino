@@ -149,7 +149,7 @@ void loop() {
       if (cnt2 == 1) {
         Serial.println("Finished");
         delay(1000);
-        sendMessage("f");
+        sendMessage("e1f");
         delay(2000);
         while (true) {
           Serial.println("ended");
