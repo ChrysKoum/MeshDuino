@@ -198,9 +198,9 @@ void sendMessage(const char *message, uint8_t destination) {
         if (rf22.sendtoWait(data_send, strlen(message), destination) == RF22_ROUTER_ERROR_NONE) {
             Serial.println("sendtoWait Successful");
             success = true;
-            number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
-            Serial.print("Number of Bytes= ");
-            Serial.println(number_of_bytes);//
+            //number_of_bytes+=sizeof(data_send); // I'm counting the number of bytes of my message
+            //Serial.print("Number of Bytes= ");
+            //Serial.println(number_of_bytes);//
 
             break;
         } else {
