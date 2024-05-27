@@ -64,10 +64,11 @@ bool xorConditions[4][3] = {
     {HIGH, HIGH, LOW}
 };
 
+}
 bool xnorConditions[4][3] = {
-    {HIGH, LOW, LOW}, 
-    {LOW, HIGH, LOW}, 
     {LOW, LOW, HIGH}, 
+    {LOW, HIGH, LOW}, 
+    {HIGH, LOW, LOW}, 
     {HIGH, HIGH, HIGH}
 };
 
