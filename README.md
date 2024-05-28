@@ -37,7 +37,7 @@ Ensure you have Python installed on your system. You can download Python [here](
    git clone https://github.com/ChrysKoum/MeshDuino.git
    ```
    ```
-2. You need to make an .env file that will targeting the .json credentials of the Realtime Firebase:
+2. You need to make an .env file that will targeting the .json credentials of the Realtime Firebase( Will need to Add the .json file also to work):
    ```
    copy .env.example .env
 
