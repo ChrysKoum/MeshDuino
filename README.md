@@ -36,13 +36,18 @@ Ensure you have Python installed on your system. You can download Python [here](
    ```
    git clone https://github.com/ChrysKoum/MeshDuino.git
    ```
-2. Navigate to the MeshDuino source directory:
    ```
-   cd ChrysKoum/MeshDuino/src
+2. You need to make an .env file that will targeting the .json credentials of the Realtime Firebase:
    ```
-3. Run the launcher file:
+   copy .env.example .env
+
+3. Navigate to the MeshDuino source directory:
    ```
-   python Launcher.py
+   cd MeshDuino
+
+4. Run the launcher file:
+   ```
+   python src/Launcher.py
    ```
 
 This will start the MeshDuino application where you can engage with various challenges and view the leaderboard of participants.
