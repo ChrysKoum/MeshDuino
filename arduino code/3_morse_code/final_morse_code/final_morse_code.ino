@@ -211,6 +211,7 @@ void loop() {
 
                     // Check if the sequence is completed
                     if (decodedLetters.endsWith(wordToDecode)) { // Update this condition as per your requirement
+                         Serial.println("");
                         Serial.println("Success");
                         decodedLetters = ""; // Optionally reset the decoded sequence
                         sendFinishMessage("e3f");
