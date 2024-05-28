@@ -142,8 +142,6 @@ void loop() {
         }
 
       
-      }
-       
       if (Serial.available()) {
         Serial.println("Experiment 2 Finish");
         String message = Serial.readStringUntil('\n');
@@ -152,6 +150,8 @@ void loop() {
           sendMessage("e2f", DESTINATION_ADDRESS_2);
         }
         break; 
+      }
+
       }
 
     }
