@@ -21,17 +21,6 @@ from backend.maze_handler.graph import Graph
 # Firebase
 import firebase_admin
 from firebase_admin import credentials, db
-# Load environment variables from .env file
-load_dotenv()
-
-# Path to your service account key file from environment variable
-service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-
-# Initialize the app with a service account, granting admin privileges
-cred = credentials.Certificate(service_account_path)
-firebase_admin.initialize_app(cred, {
-    'databaseURL': "https://meshduino-6af30-default-rtdb.europe-west1.firebasedatabase.app"
-})
 
 # Global variables
 logic_gate_app = None
