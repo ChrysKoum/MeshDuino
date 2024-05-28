@@ -93,10 +93,10 @@ def EngeeneringApp(parent):
             serial_port.set("Simulation")  # Use "Simulation" to indicate simulation mode
         if serial_port.get():
             port_selection_window.destroy()
-            logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
-            logic_gate_app.mainloop()
-            # maze_app = MazeApp(parent, serial_port.get(), None,  simulation_mode.get())
-            # maze_app.mainloop()
+            # logic_gate_app = LogicGateApp(parent, switch_to_maze_app, serial_port.get(), simulation_mode.get())
+            # logic_gate_app.mainloop()
+            maze_app = MazeApp(parent, serial_port.get(), None,  simulation_mode.get())
+            maze_app.mainloop()
             # morse_app = MorseApp(parent, serial_port.get(), finish_callback,  None, simulation_mode.get())
             # morse_app.mainloop()
         else:
@@ -303,24 +303,21 @@ class LogicGateApp(tk.Toplevel):
         """
 
         Label(help_window, text=help_text, font=("Montserrat", 14), fg="#171435", bg="#FFFFFF", justify=LEFT, wraplength=580).pack(pady=10, padx=20)
-
 class MazeApp(tk.Toplevel):
-    def __init__(self, master, serial_port, arduino_serial=None, simulation_mode=False):
+    def __init__(self, master, serial_port, arduino_serial = None):
         super().__init__(master)
         self.title("Maze Challenge")
         self.geometry("800x600")
-        self.iconbitmap(relative_to_assets("minilogo.ico"))
 
-        self.serial_port = serial_port
-        self.simulation_mode = simulation_mode
+        self.serial_port = serial_port 
         print(f"Selected serial port: {self.serial_port}")
         if arduino_serial is None:
-            self.arduino_serial = make_arduino_connection(self.serial_port, 9600, simulation_mode)
+            self.arduino_serial = make_arduino_connection(self.serial_port, 9600)
         else:
             self.arduino_serial = arduino_serial
 
-        self.grid_size = 7
-        self.side_length = 7
+        self.grid_size = 5
+        self.side_length = 5
         self.mode = 0  # Solo mode
 
         self.canvas = tk.Canvas(self, bg="#FFFFFF", width=800, height=600)
@@ -330,9 +327,6 @@ class MazeApp(tk.Toplevel):
 
         self.pause_event = Event()
         self.pause_event.set()
-
-        if self.simulation_mode:
-            self.bind_all("<Key>", self.simulate_keypress)
         
     def create_widgets(self):
         self.terminal_text = Text(self, height=10, width=80, state=DISABLED)
@@ -354,22 +348,17 @@ class MazeApp(tk.Toplevel):
 
         self.after(0, update_terminal)
 
-    def switch_to_morse_app(self, serial_port, arduino_serial, simulation_mode=False):
+    def switch_to_morse_app(parent, serial_port, arduino_serial):
         global maze_app
         if maze_app is not None:
             maze_app.destroy()
             maze_app = None  # Ensure reference is cleared
-        global start_time
-        global time_array
-        time_array.append(time.time() - start_time)
-        start_time = time.time()
         global morse_app
-        morse_app = MorseApp(self.master, serial_port, finish_callback, arduino_serial, simulation_mode)
+        morse_app = MorseApp(parent, serial_port, finish_callback, arduino_serial)
         morse_app.mainloop()
 
     def start_experiment_2(self):
-        if not self.simulation_mode:
-            self.arduino_serial.write(b'2')  
+        self.arduino_serial.write(b'2')  
 
     def on_enter(self, e):
         e.widget['background'] = '#45a049'
@@ -385,31 +374,6 @@ class MazeApp(tk.Toplevel):
     def run_maze_game(self):
         # Run Pygame in a separate thread
         Thread(target=self.run_pygame_maze_game, daemon=True).start()
-
-    def handle_key_press(self, event, player, vertices, maze):
-        move = None
-        current_point = player.get_current_position()
-        next_point = None
-
-        if event.key == pygame.K_RIGHT and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
-            move = "Right"
-            next_point = (current_point[0] + 1, current_point[1])
-        elif event.key == pygame.K_LEFT and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
-            move = "Left"
-            next_point = (current_point[0] - 1, current_point[1])
-        elif event.key == pygame.K_UP and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
-            move = "Up"
-            next_point = (current_point[0], current_point[1] - 1)
-        elif event.key == pygame.K_DOWN and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
-            move = "Down"
-            next_point = (current_point[0], current_point[1] + 1)
-
-        if next_point:
-            player.move_character(next_point)
-            self.log_to_terminal(f"Move: {move}")
-            if player.reached_goal():
-                print("Maze completed")
-                self.switch_to_morse_app(self.serial_port, self.arduino_serial, self.simulation_mode)
 
     def run_pygame_maze_game(self):
         import os
@@ -499,52 +463,35 @@ class MazeApp(tk.Toplevel):
             draw_position(screen, scaled_side_length, scaled_border_width, end_point, RED)
             pygame.display.flip()
             carryOn = True
-
             while carryOn:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         carryOn = False
-                    elif self.simulation_mode and event.type == pygame.KEYDOWN:
-                        self.handle_key_press(event, player, vertices, maze)
-                    elif not self.simulation_mode and self.arduino_serial.in_waiting > 0:
-                        receivedMessage = self.arduino_serial.readline().decode().strip()
-                        self.log_to_terminal(receivedMessage)  # Log received message to terminal
-                        current_point = player.get_current_position()
-                        next_point = None
-                        if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
-                            next_point = (current_point[0] + 1, current_point[1])
-                        elif receivedMessage == "Left" and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
-                            next_point = (current_point[0] - 1, current_point[1])
-                        elif receivedMessage == "Up" and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
-                            next_point = (current_point[0], current_point[1] - 1)
-                        elif receivedMessage == "Down" and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
-                            next_point = (current_point[0], current_point[1] + 1)
-                        if next_point:
-                            player.move_character(next_point)
-                        if player.reached_goal():
-                            carryOn = False
-                            print("Maze completed")
-                            self.arduino_serial.write(b'Experiment 2 Finish')
-                            time.sleep(2)
-                            self.switch_to_morse_app(self.serial_port, self.arduino_serial, self.simulation_mode)
-
+                if self.arduino_serial.in_waiting > 0:
+                    receivedMessage = self.arduino_serial.readline().decode().strip()
+                    self.log_to_terminal(receivedMessage)  # Log received message to terminal
+                    current_point = player.get_current_position()
+                    next_point = None
+                    if receivedMessage == "Right" and (current_point[0] + 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] + 1, current_point[1]))):
+                        next_point = (current_point[0] + 1, current_point[1])
+                    elif receivedMessage == "Left" and (current_point[0] - 1, current_point[1]) in vertices and maze.is_edge((current_point, (current_point[0] - 1, current_point[1]))):
+                        next_point = (current_point[0] - 1, current_point[1])
+                    elif receivedMessage == "Up" and (current_point[0], current_point[1] - 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] - 1))):
+                        next_point = (current_point[0], current_point[1] - 1)
+                    elif receivedMessage == "Down" and (current_point[0], current_point[1] + 1) in vertices and maze.is_edge((current_point, (current_point[0], current_point[1] + 1))):
+                        next_point = (current_point[0], current_point[1] + 1)
+                    if next_point:
+                        player.move_character(next_point)
+                    if player.reached_goal():
+                        carryOn = False
+                        print("Maze completed")
+                        self.arduino_serial.write(b'Experiment 2 Finish')
+                        time.sleep(2);
+                        self.switch_to_morse_app(self.serial_port, self.arduino_serial, self.simulation_mode)
                 pygame.display.update()
             pygame.quit()
 
         runGame(self.grid_size, self.side_length)
-
-    def simulate_keypress(self, event):
-        key = event.keysym
-        message_map = {
-            'Right': 'Right',
-            'Left': 'Left',
-            'Up': 'Up',
-            'Down': 'Down'
-        }
-        if key in message_map:
-            message = message_map[key]
-            self.log_to_terminal(f"Simulated {message} keypress")
-            self.arduino_serial.write(message.encode())
 
 class MorseApp(tk.Toplevel):
     def __init__(self, master, serial_port, finish_callback, arduino_serial=None, simulation_mode=False):
@@ -607,17 +554,12 @@ class MorseApp(tk.Toplevel):
         return selected_word
 
     def send_experiment_command(self, word):
-        if self.simulation_mode:
-            self.log_to_terminal("Experiment 3 Start")
-            time.sleep(1)  # Simulate delay
-            self.log_to_terminal(f"Sent word: {word}")
-        else:
-            self.arduino_serial.write(b'3')  # Send '3' to start
-            self.log_to_terminal("Experiment 3 Start")
-            time.sleep(5)  # Wait for the connection to establish
+        self.arduino_serial.write(b'3')  # Send '3' to start
+        self.log_to_terminal("Experiment 3 Start")
+        time.sleep(5)  # Wait for the connection to establish
 
-            self.arduino_serial.write(word.encode())  # Send the selected word
-            self.log_to_terminal(f"Sent word: {word}")
+        self.arduino_serial.write(word.encode())  # Send the selected word
+        self.log_to_terminal(f"Sent word: {word}")
 
     def display_morse_code(self, word):
         self.morse_text.config(state=tk.NORMAL)
@@ -628,20 +570,17 @@ class MorseApp(tk.Toplevel):
         self.morse_text.config(state=tk.DISABLED)
 
     def monitor_serial_for_success(self, word):
-        if self.simulation_mode:
-            Thread(target=self.simulate_serial_data, args=(word,), daemon=True).start()
-        else:
-            def read_serial():
-                while True:
-                    if self.arduino_serial.in_waiting > 0:
-                        my_data = self.arduino_serial.readline().decode('utf-8').strip()
-                        self.log_to_terminal(my_data)
-                        if "Experiment 3 Finish" in my_data:
-                            self.display_success_message()
-                            break
+        def read_serial():
+            while True:
+                if self.arduino_serial.in_waiting > 0:
+                    my_data = self.arduino_serial.readline().decode('utf-8').strip()
+                    self.log_to_terminal(my_data)
+                    if "Experiment 3 Finish" in my_data:
+                        self.display_success_message()
+                        break
 
-            self.serial_thread = Thread(target=read_serial, daemon=True)
-            self.serial_thread.start()
+        self.serial_thread = Thread(target=read_serial, daemon=True)
+        self.serial_thread.start()
 
     def simulate_serial_data(self, word):
         for letter in word:

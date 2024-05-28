@@ -22,7 +22,7 @@ def send_command_and_wait_for_response(command, expected_response, arduino_seria
 # Function to run the selected experiments
 def run_experiments(selected_option):
     # Set up the serial connection
-    arduino_serial = serial.Serial('COM11', 9600)
+    arduino_serial = serial.Serial('COM12', 9600)
     time.sleep(2)  # Wait for the connection to establish
 
     # Start timing the whole process
@@ -48,17 +48,17 @@ def run_experiments(selected_option):
     print("Experiment 3 Start.")
     if selected_option in ['3', 'All']:
         # Experiment 3: Send '3' to start, send a random 5-letter word, and wait for finish
-        send_command_and_wait_for_response('3', "Experiment 3 Start", arduino_serial)
+        # send_command_and_wait_for_response('3', "Experiment 3 Start", arduino_serial)
         
-        time.sleep(5)  # Wait for the connection to establish
+        # time.sleep(5)  # Wait for the connection to establish
         
         # Pick a random 5-letter word
-        words = ['APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY']
-        selected_word = random.choice(words)
-        print(f"Selected word for decoding: {selected_word}")
+        # words = ['APPLE', 'GRAPE', 'PEACH', 'LEMON', 'BERRY']
+        # selected_word = random.choice(words)
+        # print(f"Selected word for decoding: {selected_word}")
         
         # Wait for "Experiment 3 Finish" message
-        send_command_and_wait_for_response(selected_word, "Experiment 3 Finish", arduino_serial)
+        send_command_and_wait_for_response('3', "Experiment 3 Finish", arduino_serial)
         print("Experiment 3 finished.")
     
     # End timing the whole process

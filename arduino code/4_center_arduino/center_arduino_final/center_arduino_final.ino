@@ -6,10 +6,11 @@
 #define DESTINATION_ADDRESS_1 1 // define who I can talk to
 #define DESTINATION_ADDRESS_2 2 // define who I can talk to
 #define DESTINATION_ADDRESS_3 3 // define who I can talk to
-
+char command;
 // Singleton instance of the radio
 RF22Router rf22(MY_ADDRESS); // initiate the class to talk to my radio with MY_ADDRESS
-
+void sendMessage(const char* message, uint8_t destination);
+String receiveMessage();
 int number_of_bytes=0;
 
 void setup() {
@@ -122,54 +123,39 @@ void loop() {
          //   sendMessage_start_maze("Arduino 2 get start");
             
       while (true) {
+          
+        String receivedMessage = receiveMessage();
 
-         String receivedMessage = receiveMessage();
-
-          if (receivedMessage == "l" || receivedMessage == "r" || 
-            receivedMessage == "u" || receivedMessage == "d" || receivedMessage == "n") {
-
-            if (receivedMessage == "l") {
-                Serial.println("Left"); // Send direction to Python script
-            } else if (receivedMessage == "r") {
-                Serial.println("Right"); // Send direction to Python script
-            } else if (receivedMessage == "u") {
-                Serial.println("Up"); // Send direction to Python script
-            } else if (receivedMessage == "d") {
-                Serial.println("Down"); // Send direction to Python script
-            } else if (receivedMessage == "n") {
-                Serial.println("No move"); // Send direction to Python script
-            }
+          if (receivedMessage == "left" || receivedMessage == "right" || 
+            receivedMessage == "up" || receivedMessage == "down" || receivedMessage == "no move") {
+            Serial.println(receivedMessage); // Send direction to Python script
+            delay(1000);
         }
-
-      
-      }
-       
-      if (Serial.available()) {
+        if (Serial.available()) {
         Serial.println("Experiment 2 Finish");
         String message = Serial.readStringUntil('\n');
         message.trim();
         if(message == "Experiment 2 Finish"){
           sendMessage("e2f", DESTINATION_ADDRESS_2);
-        }
-        break; 
-      }
-
-    }
-
-
-    } else if (command == '3') {
-      Serial.println("Experiment 3 Start");
-      sendMessage("e3s", DESTINATION_ADDRESS_3);
-
-      // Wait for the word that needs decoding
-      while (true) {
-        if (Serial.available()) {
-          String wordToDecode = Serial.readStringUntil('\n');
-          wordToDecode.trim();
-          Serial.println("wordToDecode: " + String(wordToDecode));
-          sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
           break;
         }
+      }
+      }
+
+    }else if (command == '3') {
+      Serial.println("Experiment 3 Start");
+      sendMessage("e3s", DESTINATION_ADDRESS_3);
+       // delay(1000);
+      //  sendMessage("APPLE", DESTINATION_ADDRESS_3);
+      // Wait for the word that needs decoding
+     while (true) {
+      if (Serial.available()) {
+         String wordToDecode = Serial.readStringUntil('\n');
+         wordToDecode.trim();
+         Serial.println("wordToDecode: " + String(wordToDecode));
+         sendMessage(wordToDecode.c_str(), DESTINATION_ADDRESS_3);
+        break;
+       }
       }
 
       // Wait for the "Experiment 3 Finish" message
@@ -183,6 +169,7 @@ void loop() {
     }
   }
 }
+
 
 void sendMessage(const char *message, uint8_t destination) {
     uint8_t data_send[RF22_ROUTER_MAX_MESSAGE_LEN];
